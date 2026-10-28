@@ -1,0 +1,15 @@
+node_modules/
+data/
+*.log
+.DS_Store
+
+.playwright-mcp/
+.playwright/
+video/package-lock.json
+.claude/
+tmp-shots/
+evals/results/
+
+# Replays of the owner's real requests hold private mail and account data.
+local/evals/real/results/
+local/

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="640" height="640">
+  <!-- Ravnir: the raven orb looking back with two amber eyes, the default agent as the app's mark. -->
+  <defs><linearGradient id="orb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5A6496"/><stop offset="1" stop-color="#0E1018"/></linearGradient></defs>
+  <rect width="640" height="640" fill="#1B1F2E"/>
+  <g transform="translate(320 320) scale(2.7) translate(-111 -104)"><circle cx="94" cy="104" r="66" fill="url(#orb)"/><path d="M136 96 C156 86 180 88 198 106 C180 120 160 126 140 128 Z" fill="#9AA2BD"/><path d="M146 95 C164 90 180 93 192 103" fill="none" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="3" stroke-linecap="round"/><path d="M44 128 Q80 160 136 144" fill="none" stroke="#6B7499" stroke-width="6" stroke-linecap="round"/><path d="M50 72 Q66 46 96 40" fill="none" stroke="#FFFFFF" stroke-opacity="0.22" stroke-width="5" stroke-linecap="round"/><circle cx="84" cy="94" r="11" fill="#FFB547"/><circle cx="123" cy="91" r="12" fill="#FFB547"/><circle cx="86.6" cy="90.6" r="3" fill="#FFFFFF" fill-opacity="0.9"/><circle cx="126" cy="87.6" r="3.3" fill="#FFFFFF" fill-opacity="0.9"/></g>
+</svg>

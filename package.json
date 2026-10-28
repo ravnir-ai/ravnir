@@ -1,0 +1,38 @@
+{
+  "name": "ravnir",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Persistent bots with their own computer, models, memory, logins, jobs, and MCP connectors.",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test",
+    "browser:install": "playwright install chromium",
+    "doctor": "node bin/doctor.mjs",
+    "evals": "node evals/run.mjs",
+    "check:public": "node scripts/check-public.mjs",
+    "export:public": "node scripts/export-public.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@novnc/novnc": "^1.7.0",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "docx": "9.10.0",
+    "exceljs": "4.4.0",
+    "imapflow": "^2.9.1",
+    "jszip": "3.10.2",
+    "mailparser": "^3.12.4",
+    "marked": "18.1.0",
+    "mermaid": "^11.17.2",
+    "nodemailer": "^10.2.1",
+    "pdfjs-dist": "6.4.299",
+    "playwright": "^1.64.1",
+    "pptxgenjs": "4.0.1",
+    "qrcode-generator": "^2.0.4",
+    "web-push": "^3.6.7",
+    "ws": "^8.22.0"
+  }
+}

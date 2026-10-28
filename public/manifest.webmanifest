@@ -1,0 +1,17 @@
+{
+  "name": "Ravnir",
+  "short_name": "Ravnir",
+  "description": "Agents with memory that live on your own server.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f5f7",
+  "theme_color": "#f5f5f7",
+  "icons": [
+    { "src": "/icon-192.png?v=companion-20261025", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png?v=companion-20261025", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/logo.png?v=companion-20261025", "sizes": "640x640", "type": "image/png", "purpose": "any" }
+  ]
+}

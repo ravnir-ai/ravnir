@@ -1,0 +1,35 @@
+/* A skill or plugin an agent asked for (public/suggestions.js). */
+.sugg-card {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  padding: 10px 12px;
+  margin-top: 6px;
+  min-width: min(300px, 100%);
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sugg-card.open { box-shadow: inset 3px 0 0 var(--accent); }
+.sugg-head { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.sugg-head .bot-badge { flex: none; }
+.sugg-label { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); }
+.sugg-state { margin-left: auto; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.sugg-card.done .sugg-state { color: var(--green-deep); }
+.sugg-main { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+/* The Plugins page's icon tile: logos are drawn for it (Vercel's is black). */
+.sugg-icon { flex: none; width: 30px; height: 30px; padding: 4px; box-sizing: border-box; border-radius: 8px; object-fit: contain; background: var(--icon-tile); box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.07); }
+.sugg-copy { min-width: 0; }
+.sugg-title { margin: 0; font-size: 14px; line-height: 1.35; font-weight: 600; color: var(--text); overflow-wrap: break-word; }
+.sugg-what { margin: 2px 0 0; font-size: 12.5px; line-height: 1.4; color: var(--muted); overflow-wrap: break-word; }
+.sugg-why { margin: 0; font-size: 13px; line-height: 1.45; color: var(--text); overflow-wrap: break-word; }
+.sugg-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+.sugg-actions button.link { background: none; border: 0; padding: 2px 0; font: inherit; font-size: 12px; color: var(--accent); cursor: pointer; }
+.sugg-actions button.link:hover { text-decoration: underline; }
+.sugg-note { font-size: 12px; color: var(--muted); }
+.sugg-stack { display: flex; flex-direction: column; gap: 6px; min-width: min(300px, 100%); max-width: 520px; }
+.chat-row > .sugg-stack { grid-area: extra; }
+.art-row > .sugg-stack { margin-top: 0; }
+/* On Home and in the Inbox, next to task suggestions. */
+.today-section .sugg-card { max-width: none; min-width: 0; margin-top: 0; }

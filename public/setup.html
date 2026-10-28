@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Set up Ravnir</title>
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="/favicon.png?v=companion-20261025" type="image/png" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      // Same theme as the app (Settings > Appearance). System follows the device.
+      try {
+        // Settings saved while the app was called TrueBot move to their new keys once.
+        var legacy = [];
+        for (var i = 0; i < localStorage.length; i += 1) {
+          if (String(localStorage.key(i)).indexOf("truebot.") === 0) legacy.push(localStorage.key(i));
+        }
+        for (var j = 0; j < legacy.length; j += 1) {
+          var moved = "ravnir." + legacy[j].slice(8);
+          if (localStorage.getItem(moved) === null) localStorage.setItem(moved, localStorage.getItem(legacy[j]));
+          localStorage.removeItem(legacy[j]);
+        }
+        var theme = localStorage.getItem("ravnir.theme");
+        document.documentElement.setAttribute("data-theme", theme === "light" || theme === "dark" ? theme : "system");
+      } catch (error) {
+        document.documentElement.setAttribute("data-theme", "system");
+      }
+    </script>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #ffffff;
+        --soft: #f5f5f7;
+        --panel: #fbfbfd;
+        --line: rgba(0, 0, 0, 0.08);
+        --text: #1d1d1f;
+        --muted: #6e6e73;
+        --faint: #86868b;
+        --accent: #0071e3;
+        --green: #1f8f3f;
+        --body: #424245;
+        --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        --mono: "SF Mono", ui-monospace, Menlo, Monaco, monospace;
+      }
+      :root[data-theme="dark"] {
+        color-scheme: dark;
+        --bg: #000000;
+        --soft: #1c1c1e;
+        --panel: #141415;
+        --line: rgba(255, 255, 255, 0.14);
+        --text: #f5f5f7;
+        --muted: #a1a1a6;
+        --faint: #8e8e93;
+        --accent: #0a84ff;
+        --green: #5fd47d;
+        --body: #c7c7cc;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]):not([data-theme="dark"]) {
+          color-scheme: dark;
+          --bg: #000000;
+          --soft: #1c1c1e;
+          --panel: #141415;
+          --line: rgba(255, 255, 255, 0.14);
+          --text: #f5f5f7;
+          --muted: #a1a1a6;
+          --faint: #8e8e93;
+          --accent: #0a84ff;
+          --green: #5fd47d;
+          --body: #c7c7cc;
+        }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.62 var(--sans); letter-spacing: -0.008em; -webkit-font-smoothing: antialiased; }
+      main { max-width: 780px; margin: 0 auto; padding: 72px 26px 120px; }
+      .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 54px; font-size: 15px; font-weight: 600; letter-spacing: -0.02em; }
+      .mark { width: 32px; height: 32px; border-radius: 9px; object-fit: cover; display: block; box-shadow: 0 0 0 0.5px rgba(0,0,0,.08); }
+      h1 { font-size: clamp(36px, 6vw, 48px); line-height: 1.06; letter-spacing: -0.038em; font-weight: 600; margin: 0 0 16px; }
+      h2 { font-size: 26px; line-height: 1.2; letter-spacing: -0.028em; font-weight: 600; margin: 58px 0 12px; }
+      h3 { font-size: 16px; letter-spacing: -0.015em; font-weight: 600; margin: 26px 0 6px; }
+      p, li { color: var(--body); }
+      .lede { color: var(--muted); font-size: 19px; line-height: 1.55; letter-spacing: -0.012em; margin: 0; max-width: 660px; }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      code { font-family: var(--mono); font-size: 0.86em; background: var(--soft); border-radius: 5px; padding: 1.5px 5px; }
+      pre { background: var(--soft); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; overflow: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.65; }
+      pre code { background: none; padding: 0; }
+      .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; margin: 12px 0; }
+      .step { display: flex; gap: 14px; align-items: flex-start; }
+      .num { flex: none; width: 27px; height: 27px; border-radius: 50%; background: var(--soft); color: var(--muted); display: grid; place-items: center; font: 600 12px var(--mono); }
+      .note { background: var(--soft); border-radius: 14px; padding: 15px 18px; color: var(--muted); font-size: 14px; line-height: 1.6; margin: 18px 0; }
+      .ok { color: var(--green); }
+      hr { border: 0; border-top: 1px solid var(--line); margin: 48px 0; }
+      .back { display: inline-block; margin-top: 30px; }
+      table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 18px 0; }
+      td, th { border-bottom: 1px solid var(--line); text-align: left; padding: 10px 6px; vertical-align: top; }
+      th { color: var(--muted); font-weight: 600; }
+      @media (max-width: 600px) { main { padding: 44px 20px 90px; } h2 { margin-top: 44px; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="brand"><img class="mark" src="/logo.png?v=companion-20261025" alt="" /><strong>Ravnir</strong></div>
+      <h1>Set up Ravnir</h1>
+      <p class="lede">A server that runs named bots, each with its own computer, model, memory, logins, and schedule. This guide assumes nothing except a machine and a terminal.</p>
+
+      <h2>1. Install on a Linux server</h2>
+      <p>Any Linux machine or VPS with Git works: Ubuntu 24.04 is what it is tested on. Give it 2 CPUs, 4 GB of RAM and 15 GB of disk. Three agents with their browsers open used 1.4 GB in our test, so 2 GB is the bare minimum.</p>
+      <pre><code>git clone &lt;your-fork-or-copy&gt; ravnir
+cd ravnir
+./install.sh</code></pre>
+      <p>The installer uses rootless Podman when it works for your user, then Docker, and offers to install Podman when there is neither. It builds the server image (a few minutes the first time), keeps everything in the <code>ravnir-data</code> volume, turns sign-in on with a generated password that it shows once, and starts Ravnir again after a reboot. It asks how you will reach it:</p>
+      <table>
+        <tr><th>Choice</th><th>What you get</th></tr>
+        <tr><td>Tailscale (recommended)</td><td>A private https address only your own devices can open. Nothing is open to the internet. The phone needs the Tailscale app, signed in to the same account.</td></tr>
+        <tr><td>Your own domain</td><td>https with automatic certificates from Caddy. Point the domain's DNS at the server and open ports 80 and 443 first: <code>./install.sh --access domain --domain ravnir.example.com</code></td></tr>
+        <tr><td>Only this computer</td><td>Ravnir listens on loopback only. Reach it from a laptop through an SSH tunnel. Phones cannot install the app this way.</td></tr>
+      </table>
+      <p>Run <code>./install.sh</code> again to update: your data, password and choices are kept. <code>./install.sh --reset-password</code> makes a new password, <code>./install.sh doctor</code> checks the install, and <code>./install.sh uninstall</code> removes it (add <code>--purge</code> to delete the data too). The settings it writes are in <code>~/.config/ravnir/ravnir.env</code>; lines you add there are kept and reach the server on its next start.</p>
+      <p class="note">Agents run commands and a browser inside the container, as its own user. The container is the boundary: give the server only the access you want your agents to have.</p>
+
+      <h2>2. Or run it on a Mac, or for development</h2>
+      <p>Install Node 22 or newer, then:</p>
+      <pre><code>git clone &lt;your-fork-or-copy&gt; ravnir
+cd ravnir
+npm install
+npx playwright install chromium
+RAVNIR_VAULT=local npm start
+# open http://127.0.0.1:3847</code></pre>
+      <p><code>RAVNIR_VAULT=local</code> keeps the agents' shared notes in a git repo under <code>data/vault</code>. With <a href="https://opencode.ai">OpenCode</a> installed (<code>npm install -g opencode-ai</code>), the first-run setup can start it for you; or start Ravnir with <code>RAVNIR_OPENCODE=managed</code>. Ravnir then runs its own OpenCode on loopback with a password only it knows.</p>
+      <p>Port 3847 is the default; change it with <code>RAVNIR_PORT</code>. Ravnir refuses to listen on anything but loopback unless sign-in is on (<code>RAVNIR_USER</code> and <code>RAVNIR_PASSWORD</code>).</p>
+
+      <h2>3. First run</h2>
+      <p>The first time you open Ravnir, a short setup asks for your name and language, connects a model, makes your first agents (a chief of staff, a researcher, an engineer, and an inbox helper once Gmail is connected), optionally links your notes to a git repository, and shows a QR code to put the app on your phone. Leaving Grok Bot? The agents step links to <strong>Import from Grok Bot</strong>. You can open the setup again from <strong>Settings, Tools</strong>.</p>
+      <p>To put the app on a phone later, open <strong>Settings, Security, Add a device</strong>: it shows a one-time pairing code, good for 15 minutes, so you never type the password on the phone.</p>
+
+      <h2>4. Models</h2>
+      <p>Ravnir does not include a model. Through OpenCode it can use the providers you sign in to in <strong>Settings, Models</strong>: a ChatGPT, GitHub Copilot or SuperGrok subscription by device code, or an API key for any of OpenCode's providers. OpenCode also offers a few free models that need no account; setup picks the one whose provider keeps the least of your data, from what <a href="https://opencode.ai/docs/zen">OpenCode's docs</a> say. They can be slow or rate limited.</p>
+      <p>Any OpenAI-compatible server works too: add it in <strong>Settings, Models</strong>.</p>
+      <table>
+        <tr><th>Server</th><th>Base URL</th><th>Notes</th></tr>
+        <tr><td>OpenCode</td><td>run by Ravnir</td><td>Recommended. Many providers, tools, per-agent model.</td></tr>
+        <tr><td>Ollama</td><td><code>http://127.0.0.1:11434/v1</code></td><td>Local models.</td></tr>
+        <tr><td>LM Studio</td><td><code>http://127.0.0.1:1234/v1</code></td><td>Local models. Slow on some machines.</td></tr>
+        <tr><td>Hosted API</td><td><code>https://host/v1</code></td><td>Paste the API key when you add it.</td></tr>
+      </table>
+      <p class="note">Model usage is billed by whoever runs the model. Ravnir adds no usage of its own and sends no telemetry. A scheduled job consumes model tokens each time it runs.</p>
+
+      <h2>5. Your data</h2>
+      <p>With the installer, everything lives in the <code>ravnir-data</code> volume; with <code>npm start</code>, in <code>data/</code>: state, each agent's workspace and browser profile, encrypted secrets, events, diffs, schedules, the notes vault and OpenCode's logins. Back it up. Do not commit it.</p>
+
+      <h2>6. The computer</h2>
+      <ul>
+        <li><strong>Screen</strong> is a real Chromium on the server. Click the image to click the page. Click a field, type in the strip below, press Enter. The browser profile is per bot, so cookies survive restarts.</li>
+        <li><strong>Desktop</strong> is the whole X display on Linux. It shows the browser plus any native app the bot opens. Clicks and keys go through xdotool. Install <code>Xvfb openbox xdotool scrot tesseract-ocr tesseract-ocr-spa</code> on the server to use it.</li>
+        <li><strong>Files</strong> is the bot's workspace. You can open and edit files. Saves produce diffs.</li>
+        <li><strong>Shell</strong> runs commands on the server in the bot's workspace, with a persistent home for npm, pip, uv, cargo and bun installs. The bot can run commands too.</li>
+        <li><strong>Logins</strong> stores site passwords encrypted with AES-256-GCM in <code>data/secrets.enc</code>. The password is never shown to the model. A bot can sign in with a saved login and only sees “signed in”.</li>
+      </ul>
+      <p>Bots get two computer tools. <code>computer_task</code> reads the page DOM and offers the next clicks, keys and fields; <code>desktop_task</code> captures the X screen, reads it with Tesseract OCR and offers the labels it can click. Something picks each step: TypeSafe Jev in milliseconds when <code>TYPESAFE_API_KEY</code> is set, otherwise the quick model (<code>RAVNIR_QUICK_URL</code>) or the bot's own OpenAI-compatible model, otherwise the bot itself, one <code>computer_step</code> at a time. No key is required. Every step is saved under <code>data/bots/&lt;id&gt;/computer/</code> and shown in the thread.</p>
+      <p>Try the built-in demo: open <code>/demo/login</code> in the bot's browser, sign in with any username and password, then reopen the computer. The session is still there.</p>
+
+      <h2>7. Jobs</h2>
+      <p>Jobs are cron entries that wake a bot. They run on the server when the browser is closed. Use standard five-field cron: minute hour day month weekday.</p>
+      <pre><code>0 8 * * 1-5     every weekday at 08:00
+*/30 * * * *    every 30 minutes
+0 18 1 * *      the first of the month at 18:00</code></pre>
+      <p>Add a job in the <strong>Jobs</strong> panel, or ask a bot to create one. Each job has an instruction, a next run, and a short run history. “Run now” tests it immediately.</p>
+
+      <h2>8. MCP and connectors</h2>
+      <p>The <strong>MCP</strong> panel adds a Model Context Protocol server to one bot. Use a local command for stdio, or a URL for remote HTTP. Ravnir connects, lists the tools, and gives them to the bot on its next turn. For OpenCode bots, the connector is also written into that bot's <code>opencode.json</code> so OpenCode can see it.</p>
+      <p>Secrets you enter for a connector are stored encrypted by Ravnir. OpenCode needs them in its own local config, so the bot's <code>opencode.json</code> is written with mode 600. Treat the workspace as private.</p>
+
+      <h2>9. Running it on a VPS by hand</h2>
+      <p>The installer covers this. Without it, do not expose the port directly: the app controls a browser and a shell. Keep it on loopback and reach it through an SSH tunnel, Tailscale (<code>tailscale serve --bg --https=443 http://127.0.0.1:3847</code>) or a reverse proxy with TLS, with sign-in on:</p>
+      <pre><code>RAVNIR_USER=you RAVNIR_PASSWORD='a-long-password' \
+RAVNIR_PUBLIC_URL=https://ravnir.example.com npm start</code></pre>
+      <p>Keep the process alive with systemd, launchd, pm2, or tmux. Agents only stay on while the Ravnir process is running.</p>
+      <p class="note">Make <code>master.key</code> and <code>secrets.enc</code> part of your backup, and keep them private. Lose the key and the saved logins are unrecoverable. Leak it and they are exposed.</p>
+
+      <h2>10. Check it</h2>
+      <pre><code>./install.sh doctor    # with the installer
+npm run doctor         # with npm start</code></pre>
+      <p>It checks the data folder and disk, sign-in, that Chromium starts, the desktop tools, OpenCode, that a model is connected, the notes vault and phone notifications, and exits with an error when something required fails. The report names no host, address or person, so you can paste it into an issue.</p>
+
+      <hr />
+      <p>Ravnir is original open-source software. It is not affiliated with, decompiled from, or copied from Grok Bot. It uses no one else's prompts, assets, or credentials.</p>
+      <a class="back" href="/">← Back to your bots</a>
+    </main>
+  </body>
+</html>

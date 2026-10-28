@@ -1,0 +1,26 @@
+# Ravnir with Docker Compose, for people who prefer it to install.sh (which also sets up Tailscale
+# or a domain and keeps a generated password). Put the sign-in in a .env file next to this one:
+#   RAVNIR_USER=you
+#   RAVNIR_PASSWORD=a-long-random-password
+#   RAVNIR_PUBLIC_URL=https://ravnir.example.com   (optional, the https address you reach it at)
+# then: docker compose up -d --build
+services:
+  ravnir:
+    build: .
+    image: localhost/ravnir:local
+    container_name: ravnir
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3847:3847"
+    shm_size: 1gb
+    environment:
+      RAVNIR_USER: ${RAVNIR_USER:?set RAVNIR_USER in .env}
+      RAVNIR_PASSWORD: ${RAVNIR_PASSWORD:?set RAVNIR_PASSWORD in .env}
+      RAVNIR_PUBLIC_URL: ${RAVNIR_PUBLIC_URL:-}
+      RAVNIR_ACCESS: ${RAVNIR_ACCESS:-}
+      TZ: ${TZ:-UTC}
+    volumes:
+      - ravnir-data:/data
+
+volumes:
+  ravnir-data:

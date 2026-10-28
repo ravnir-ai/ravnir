@@ -1,0 +1,240 @@
+[
+  {
+    "id": "github",
+    "name": "GitHub",
+    "description": "GitHub's official MCP server for repositories, issues, pull requests, code search and Actions.",
+    "category": "devops",
+    "simpleIcon": "github",
+    "kind": "remote",
+    "homepage": "https://github.com",
+    "remote": {
+      "url": "https://api.githubcopilot.com/mcp/",
+      "transport": "streamable-http"
+    },
+    "auth": "token",
+    "tokenHeader": "Authorization: Bearer",
+    "tokenHelp": "Create a fine-grained personal access token at https://github.com/settings/personal-access-tokens/new",
+    "shellEnv": ["GH_TOKEN", "GITHUB_TOKEN"]
+  },
+  {
+    "id": "vercel",
+    "name": "Vercel",
+    "description": "Manage Vercel projects, deployments and environment variables from an MCP client.",
+    "category": "devops",
+    "simpleIcon": "vercel",
+    "kind": "remote",
+    "homepage": "https://vercel.com",
+    "remote": {
+      "url": "https://mcp.vercel.com",
+      "transport": "streamable-http"
+    }
+  },
+  {
+    "id": "atlassian",
+    "name": "Jira and Confluence",
+    "description": "Jira and Confluence tools for issues, pages, projects and search.",
+    "category": "productivity",
+    "simpleIcon": "jira",
+    "kind": "remote",
+    "homepage": "https://www.atlassian.com",
+    "remote": {
+      "url": "https://mcp.atlassian.com/v1/mcp",
+      "transport": "streamable-http"
+    }
+  },
+  {
+    "id": "linear",
+    "name": "Linear",
+    "description": "Create, search and update Linear issues, projects and cycles.",
+    "category": "productivity",
+    "simpleIcon": "linear",
+    "kind": "remote",
+    "homepage": "https://linear.app",
+    "remote": {
+      "url": "https://mcp.linear.app/mcp",
+      "transport": "streamable-http"
+    }
+  },
+  {
+    "id": "notion",
+    "name": "Notion",
+    "description": "Read and write Notion pages, databases and comments.",
+    "category": "productivity",
+    "simpleIcon": "notion",
+    "kind": "remote",
+    "homepage": "https://www.notion.com",
+    "remote": {
+      "url": "https://mcp.notion.com/mcp",
+      "transport": "streamable-http"
+    }
+  },
+  {
+    "id": "sentry",
+    "name": "Sentry",
+    "description": "Inspect Sentry issues, events, releases and performance data.",
+    "category": "devops",
+    "simpleIcon": "sentry",
+    "kind": "remote",
+    "homepage": "https://sentry.io",
+    "remote": {
+      "url": "https://mcp.sentry.dev/mcp",
+      "transport": "streamable-http"
+    }
+  },
+  {
+    "id": "stripe",
+    "name": "Stripe",
+    "description": "Stripe tools for customers, payments, invoices and documentation.",
+    "category": "finance",
+    "simpleIcon": "stripe",
+    "kind": "remote",
+    "homepage": "https://stripe.com",
+    "remote": {
+      "url": "https://mcp.stripe.com",
+      "transport": "streamable-http"
+    }
+  },
+  {
+    "id": "supabase",
+    "name": "Supabase",
+    "description": "Manage Supabase projects, databases, branches and edge functions.",
+    "category": "database",
+    "simpleIcon": "supabase",
+    "kind": "remote",
+    "homepage": "https://supabase.com",
+    "remote": {
+      "url": "https://mcp.supabase.com/mcp",
+      "transport": "streamable-http"
+    }
+  },
+  {
+    "id": "neon",
+    "name": "Neon",
+    "description": "Manage Neon Postgres projects, branches and connection strings.",
+    "category": "database",
+    "simpleIcon": "neon",
+    "kind": "remote",
+    "homepage": "https://neon.tech",
+    "remote": {
+      "url": "https://mcp.neon.tech/mcp",
+      "transport": "streamable-http"
+    }
+  },
+  {
+    "id": "asana",
+    "name": "Asana",
+    "description": "Asana tools for tasks, projects, workspaces and comments.",
+    "category": "productivity",
+    "simpleIcon": "asana",
+    "kind": "remote",
+    "homepage": "https://asana.com",
+    "remote": {
+      "url": "https://mcp.asana.com/sse",
+      "transport": "sse"
+    }
+  },
+  {
+    "id": "huggingface",
+    "name": "Hugging Face",
+    "description": "Search Hugging Face models, datasets and papers, and use Hub tools.",
+    "category": "ai",
+    "simpleIcon": "huggingface",
+    "kind": "remote",
+    "homepage": "https://huggingface.co",
+    "remote": {
+      "url": "https://huggingface.co/mcp",
+      "transport": "streamable-http"
+    }
+  },
+  {
+    "id": "canva",
+    "name": "Canva",
+    "description": "Create and edit Canva designs, folders and brand assets.",
+    "category": "design",
+    "simpleIcon": "canva",
+    "kind": "remote",
+    "homepage": "https://www.canva.com",
+    "remote": {
+      "url": "https://mcp.canva.com/mcp",
+      "transport": "streamable-http"
+    }
+  },
+  {
+    "id": "figma",
+    "name": "Figma",
+    "description": "Read Figma files, components, styles and comments, with design context for code.",
+    "category": "design",
+    "simpleIcon": "figma",
+    "kind": "remote",
+    "homepage": "https://www.figma.com",
+    "remote": {
+      "url": "https://mcp.figma.com/mcp",
+      "transport": "streamable-http"
+    }
+  },
+  {
+    "id": "paypal",
+    "name": "PayPal",
+    "description": "PayPal tools for payments, invoices, transactions and disputes.",
+    "category": "finance",
+    "simpleIcon": "paypal",
+    "kind": "remote",
+    "homepage": "https://www.paypal.com",
+    "remote": {
+      "url": "https://mcp.paypal.com/mcp",
+      "transport": "streamable-http"
+    }
+  },
+  {
+    "id": "intercom",
+    "name": "Intercom",
+    "description": "Read and reply to Intercom conversations, contacts and help center content.",
+    "category": "support",
+    "simpleIcon": "intercom",
+    "kind": "remote",
+    "homepage": "https://www.intercom.com",
+    "remote": {
+      "url": "https://mcp.intercom.com/mcp",
+      "transport": "streamable-http"
+    }
+  },
+  {
+    "id": "monday",
+    "name": "monday.com",
+    "description": "monday.com boards, items, groups and updates.",
+    "category": "productivity",
+    "simpleIcon": "mondaydotcom",
+    "kind": "remote",
+    "homepage": "https://monday.com",
+    "remote": {
+      "url": "https://mcp.monday.com/mcp",
+      "transport": "streamable-http"
+    }
+  },
+  {
+    "id": "cloudflare",
+    "name": "Cloudflare",
+    "description": "Cloudflare Workers bindings, KV, R2, D1 and other developer platform tools.",
+    "category": "devops",
+    "simpleIcon": "cloudflare",
+    "kind": "remote",
+    "homepage": "https://www.cloudflare.com",
+    "remote": {
+      "url": "https://bindings.mcp.cloudflare.com/mcp",
+      "transport": "streamable-http"
+    }
+  },
+  {
+    "id": "hubspot",
+    "name": "HubSpot",
+    "description": "HubSpot CRM tools for contacts, companies, deals and marketing.",
+    "category": "sales",
+    "simpleIcon": "hubspot",
+    "kind": "remote",
+    "homepage": "https://www.hubspot.com",
+    "remote": {
+      "url": "https://mcp.hubspot.com/",
+      "transport": "streamable-http"
+    }
+  }
+]

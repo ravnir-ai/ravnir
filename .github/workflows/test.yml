@@ -1,0 +1,55 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Node 22 (${{ matrix.suite }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [app, terminal]
+    env:
+      RAVNIR_AI_MEMORY: "off"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium and system dependencies
+        if: matrix.suite == 'app'
+        run: npx playwright install --with-deps chromium
+      - name: Check Python terminal bridge dependency
+        if: matrix.suite == 'terminal'
+        run: python3 --version
+      - name: Public data check
+        if: matrix.suite == 'app'
+        run: node scripts/check-public.mjs
+      - name: Application tests
+        if: matrix.suite == 'app'
+        shell: bash
+        run: |
+          files=(test/*.test.js)
+          suite=()
+          for file in "${files[@]}"; do
+            if [[ "$file" != test/terminal.test.js ]]; then suite+=("$file"); fi
+          done
+          timeout --kill-after=10s 10m node --test --test-timeout=180000 "${suite[@]}"
+      - name: Terminal tests in an isolated process
+        if: matrix.suite == 'terminal'
+        run: timeout --kill-after=10s 2m node --test --test-timeout=120000 test/terminal.test.js

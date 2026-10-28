@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Ravnir</title>
+    <link rel="icon" href="/favicon.png?v=companion-20261025" type="image/png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Ravnir" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="apple-touch-icon" href="/icon-512.png?v=companion-20261025" />
+    <meta name="theme-color" content="#f5f5f7" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta property="og:title" content="Ravnir" />
+    <meta property="og:description" content="Agents with memory that live on your own server." />
+    <meta property="og:image" content="/og.jpg?v=companion-20261025" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      // Theme before first paint: Settings > Appearance (this device). System follows the OS.
+      try {
+        // Settings saved while the app was called TrueBot move to their new keys once.
+        var legacy = [];
+        for (var i = 0; i < localStorage.length; i += 1) {
+          if (String(localStorage.key(i)).indexOf("truebot.") === 0) legacy.push(localStorage.key(i));
+        }
+        for (var j = 0; j < legacy.length; j += 1) {
+          var moved = "ravnir." + legacy[j].slice(8);
+          if (localStorage.getItem(moved) === null) localStorage.setItem(moved, localStorage.getItem(legacy[j]));
+          localStorage.removeItem(legacy[j]);
+        }
+        var theme = localStorage.getItem("ravnir.theme");
+        document.documentElement.setAttribute("data-theme", theme === "light" || theme === "dark" ? theme : "system");
+      } catch (error) {
+        document.documentElement.setAttribute("data-theme", "system");
+      }
+    </script>
+    <link rel="stylesheet" href="/app.css" />
+    <link rel="stylesheet" href="/markdown.css" />
+    <link rel="stylesheet" href="/highlight.css" />
+    <link rel="stylesheet" href="/charts.css" />
+    <link rel="stylesheet" href="/choices.css" />
+    <link rel="stylesheet" href="/questions.css" />
+    <link rel="stylesheet" href="/suggestions.css" />
+    <link rel="stylesheet" href="/memory.css" />
+    <link rel="stylesheet" href="/artifacts.css" />
+    <link rel="stylesheet" href="/models.css" />
+    <link rel="stylesheet" href="/home.css" />
+    <link rel="stylesheet" href="/welcome.css" />
+  </head>
+  <body>
+    <div class="shell" id="shell">
+      <aside class="rail">
+        <div id="main-hero" class="main-hero" aria-label="Main agent"></div>
+        <div id="pin-row" class="pin-row" aria-label="Pinned agents"></div>
+
+        <nav class="rail-nav" aria-label="Views">
+          <button id="today-nav" class="today-nav" type="button">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3.2 8.4 10 3l6.8 5.4V16a1 1 0 0 1-1 1h-3.5v-4.4H7.7V17H4.2a1 1 0 0 1-1-1Z"></path></svg>
+            <span>Home</span>
+            <span id="today-badge" class="badge" hidden>0</span>
+            <span id="today-spend" class="today-spend"></span>
+          </button>
+          <button id="inbox-nav" class="today-nav" type="button">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.2 5.2 4.9a1 1 0 0 1 .95-.7h7.7a1 1 0 0 1 .95.7L17 11.2V15a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z"></path><path d="M3 11.2h4.2a1 1 0 0 1 1 .9 1.9 1.9 0 0 0 3.6 0 1 1 0 0 1 1-.9H17"></path></svg>
+            <span>Inbox</span>
+            <span id="inbox-badge" class="badge" hidden>0</span>
+          </button>
+        </nav>
+
+        <div class="rail-label">
+          <span class="rail-label-text">Agents <span id="bot-count" class="count">0</span></span>
+          <div class="rail-actions">
+            <button id="rail-search" class="icon-btn" type="button" title="Search agents" aria-label="Search agents"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8.6" cy="8.6" r="5.2"></circle><path d="M12.5 12.5 17 17"></path></svg></button>
+            <button id="new-bot" class="round-add" type="button" title="New agent" aria-label="New agent">+</button>
+          </div>
+        </div>
+        <input id="bot-search" class="bot-search" placeholder="Search agents" autocomplete="off" hidden />
+        <div id="bot-list" class="bot-list"></div>
+
+        <div class="rail-foot">
+          <!-- Setup and occasional views sit at the bottom; Home and Inbox stay on top. -->
+          <nav class="rail-nav rail-nav-foot" aria-label="Tools">
+            <button id="memory-nav" class="today-nav" type="button">
+              <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H16v12H5.5A1.5 1.5 0 0 0 4 16.5Z"></path><path d="M4 16.5A1.5 1.5 0 0 0 5.5 18H16"></path><path d="M8 7h5M8 10h3"></path></svg>
+              <span>Memory</span>
+            </button>
+            <button id="skills-nav" class="today-nav" type="button">
+              <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3.2l1.5 4.1 4.1 1.5-4.1 1.5L9 14.4l-1.5-4.1-4.1-1.5 4.1-1.5Z"></path><path d="M15 12.6l.6 1.7 1.7.6-1.7.6-.6 1.7-.6-1.7-1.7-.6 1.7-.6Z"></path></svg>
+              <span>Skills</span>
+            </button>
+            <button id="plugins-nav" class="today-nav" type="button">
+              <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="5.6" height="5.6" rx="1.5"></rect><rect x="11.4" y="3" width="5.6" height="5.6" rx="1.5"></rect><rect x="3" y="11.4" width="5.6" height="5.6" rx="1.5"></rect><path d="M14.2 11.6v5.2M11.6 14.2h5.2"></path></svg>
+              <span>Plugins</span>
+            </button>
+            <button id="settings-nav" class="today-nav" type="button">
+              <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="2.6"></circle><path d="M10 3v1.8M10 15.2V17M3 10h1.8M15.2 10H17M5.1 5.1l1.3 1.3M13.6 13.6l1.3 1.3M14.9 5.1l-1.3 1.3M6.4 13.6l-1.3 1.3"></path></svg>
+              <span>Settings</span>
+            </button>
+          </nav>
+          <div class="server-card">
+            <span id="server-pulse" class="pulse"></span>
+            <div class="server-copy">
+              <strong>This server</strong>
+              <small id="server-url">connecting…</small>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="thread" id="thread">
+        <div id="net-bar" class="net-bar" role="status" aria-live="polite" hidden>Reconnecting…</div>
+        <header id="thread-head" class="thread-head">
+          <button id="mobile-back" class="mobile-back mobile-only" type="button" aria-label="Back" title="Back">
+            <svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"></path></svg>
+          </button>
+          <button id="bot-head" class="bot-head" type="button" aria-haspopup="dialog" title="Settings and more">
+            <span id="thread-avatar" class="avatar empty"></span>
+            <span class="bot-head-copy">
+              <span class="name-row"><span id="thread-name" class="thread-name">Ravnir</span><span id="main-chip" class="main-star main-chip" role="img" aria-label="Main agent" title="Main agent" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.9-4.6 4.5 1.1 6.4-5.7-3-5.7 3 1.1-6.4-4.6-4.5 6.4-.9z"/></svg></span><span id="online-chip" class="online-chip" title="On"><i></i><span class="online-text">on</span></span><svg class="head-chevron" viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 2.5 8 6l-3.5 3.5"></path></svg></span>
+              <span id="thread-job" class="thread-job">Pick an agent on the left, or make one.</span>
+            </span>
+          </button>
+          <div class="thread-actions">
+            <button id="model-chip" class="chip" type="button">No model</button>
+            <button id="open-settings" class="ghost" type="button" title="Agent settings"><span class="wide-label">Agent </span>settings</button>
+            <button id="today-toggle" class="ghost mobile-only" type="button">Home<span id="today-badge-mobile" class="badge" hidden>0</span></button>
+            <button id="rail-toggle" class="ghost mobile-only" type="button">Agents</button>
+            <button id="toggle-computer" class="ghost mobile-only" type="button">Computer</button>
+            <button id="head-computer" class="head-icon phone-only" type="button" aria-label="Open the computer" title="Computer">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="12" rx="2.2"></rect><path d="M8.5 20h7M12 16.5V20"></path></svg>
+            </button>
+          </div>
+        </header>
+
+        <div id="activity-bar" class="activity-bar" hidden>
+          <span class="spinner" aria-hidden="true"></span>
+          <span id="activity-text">Thinking</span>
+          <span id="activity-time" class="muted mono"></span>
+          <button id="toggle-thinking" class="link-btn" type="button" title="Show or hide tool details">Details</button>
+          <button id="toggle-diffs" class="link-btn" type="button" title="Show or hide diffs in the thread">Diffs</button>
+          <button id="activity-stop" class="link-btn" type="button">Stop</button>
+        </div>
+
+        <div id="messages" class="messages" aria-live="polite"></div>
+
+        <div id="permission-bar" class="permission-bar" hidden>
+          <div class="permission-copy">
+            <strong>Waiting for your approval</strong>
+            <p id="permission-title"></p>
+            <pre id="permission-detail" class="permission-detail" hidden></pre>
+            <button id="permission-expand" class="permission-expand" type="button" hidden>Show the full command</button>
+          </div>
+          <div class="permission-actions">
+            <button type="button" class="allow" data-takeover hidden>Take control</button>
+            <button type="button" class="allow" data-decision="once">Allow once</button>
+            <button type="button" data-decision="always">Always allow</button>
+            <button type="button" class="danger-text" data-decision="reject">Deny</button>
+            <button type="button" class="trust-link" data-decision="trust" title="Stop asking for terminal, file, and login approvals on this agent">Trust this agent</button>
+          </div>
+          <p id="permission-rule" class="permission-rule" hidden></p>
+        </div>
+
+        <div id="empty-thread" class="empty-thread" hidden>
+          <h2>Your agents live on this server.</h2>
+          <p>They keep working after you close the tab. Each one has a computer you can watch.</p>
+          <button id="empty-create" class="primary" type="button">Create your first agent</button>
+        </div>
+
+        <form id="composer" class="composer">
+          <button id="jump-latest" class="jump-latest" type="button" hidden aria-label="Jump to the latest message"><span aria-hidden="true">↓</span> <span id="jump-label">Latest</span></button>
+          <div id="mention-menu" class="mention-menu" role="listbox" aria-label="Tag an agent" hidden></div>
+          <div id="attach-tray" class="attach-tray" aria-label="Attached files" hidden></div>
+          <label class="sr" for="composer-input">Message</label>
+          <textarea id="composer-input" rows="1" placeholder="Message your agent…" aria-autocomplete="list"></textarea>
+          <div class="composer-row">
+            <button id="attach-btn" type="button" class="attach" aria-label="Attach photos or files" title="Attach photos or files"><svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"></path></svg></button>
+            <input id="attach-input" type="file" multiple hidden>
+            <span id="composer-hint" class="composer-hint">Enter to send · Shift+Enter for a new line · @ to tag an agent</span>
+            <div class="composer-actions">
+              <button id="mic-btn" type="button" class="mic" hidden aria-pressed="false" aria-label="Dictate a message" title="Dictate a message"></button>
+              <button id="stop-btn" type="button" class="stop" hidden>Stop</button>
+              <button id="voice-btn" type="button" class="voice-go" hidden aria-haspopup="dialog" aria-label="Talk by voice" title="Talk to this agent by voice"><svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8.5v3M7.3 6v8M10.6 3.5v13M13.9 6.5v7M17 8.8v2.4"></path></svg></button>
+              <button id="send-btn" type="submit" class="send" aria-label="Send" title="Send"><span aria-hidden="true">↑</span></button>
+            </div>
+          </div>
+        </form>
+
+        <section id="today-view" class="today" hidden>
+          <header class="today-head">
+            <div>
+              <p id="today-kicker" class="kicker">Today</p>
+              <h1 id="today-title">Today</h1>
+            </div>
+            <div class="row">
+              <button id="today-prev" class="icon-btn" type="button" title="Previous day" aria-label="Previous day">‹</button>
+              <button id="today-now" class="ghost" type="button">Today</button>
+              <button id="today-next" class="icon-btn" type="button" title="Next day" aria-label="Next day">›</button>
+            </div>
+          </header>
+          <div id="today-body" class="today-body"></div>
+        </section>
+
+        <section id="inbox-view" class="today" hidden>
+          <header class="today-head">
+            <div>
+              <p class="kicker">Inbox</p>
+              <h1>From your agents</h1>
+            </div>
+            <div class="row">
+              <button id="inbox-mark-all" class="ghost" type="button">Mark all read</button>
+            </div>
+          </header>
+          <div id="inbox-body" class="today-body">
+            <div id="inbox-device"></div>
+            <div id="inbox-suggestions"></div>
+            <div id="inbox-list"></div>
+          </div>
+        </section>
+
+        <section id="plugins-view" class="today" hidden>
+          <header class="today-head">
+            <div>
+              <p class="kicker">Plugins</p>
+              <h1>Connect your tools</h1>
+            </div>
+          </header>
+          <div id="plugins-body" class="today-body plugins-body"></div>
+        </section>
+
+        <section id="skills-view" class="today" hidden>
+          <header class="today-head">
+            <div>
+              <p class="kicker">Skills</p>
+              <h1>Teach your agents</h1>
+            </div>
+          </header>
+          <div id="skills-body" class="today-body plugins-body"></div>
+        </section>
+
+        <section id="memory-view" class="today" hidden>
+          <header class="today-head">
+            <div>
+              <p class="kicker">Memory</p>
+              <h1>What your agents remember</h1>
+            </div>
+          </header>
+          <div id="memory-body" class="today-body memory-body"></div>
+        </section>
+
+        <section id="settings-view" class="today" hidden>
+          <header class="today-head">
+            <div>
+              <p class="kicker">Settings</p>
+              <h1>Settings</h1>
+            </div>
+          </header>
+          <div id="settings-body" class="today-body settings-body"></div>
+        </section>
+
+        <section id="import-view" class="today" hidden>
+          <header class="today-head">
+            <div>
+              <p class="kicker">Import</p>
+              <h1>Bring a Grok Bot agent over</h1>
+            </div>
+          </header>
+          <div id="import-body" class="today-body"></div>
+        </section>
+      </main>
+
+      <aside class="computer" id="computer">
+        <header class="profile-head">
+          <div id="profile-avatar" class="avatar xl">T</div>
+          <h2 id="computer-name">Your agent</h2>
+          <p id="profile-job" class="profile-job">A teammate on this server</p>
+          <span id="profile-label" class="profile-label">Personal</span>
+          <div class="profile-url-row">
+            <span id="computer-dot" class="live-dot"></span>
+            <span id="computer-caption" class="profile-url">Not started</span>
+            <button id="computer-refresh" class="icon-btn" type="button" title="Refresh">⟳</button>
+          </div>
+          <button id="computer-close" class="computer-close mobile-only" type="button" aria-label="Close the computer">Done</button>
+        </header>
+
+        <div class="tabs-wrap" id="tabs-wrap"><nav class="computer-tabs" id="computer-tabs" aria-label="Agent panel">
+          <button type="button" data-group="computer" class="on">Computer</button>
+          <button type="button" data-group="files">Files <span id="files-count" class="tab-count"></span></button>
+          <button type="button" data-group="shell">Terminal</button>
+          <button type="button" data-group="routines">Routines</button>
+          <button type="button" data-group="setup">Setup</button>
+        </nav></div>
+        <nav class="sub-tabs" id="sub-tabs" aria-label="Section" hidden>
+          <button type="button" data-group="computer" data-panel="screen" class="on">Browser</button>
+          <button type="button" data-group="computer" data-panel="desktop" hidden>Whole screen</button>
+          <button type="button" data-group="files" data-panel="saved">Saved</button>
+          <button type="button" data-group="files" data-panel="files">Workspace</button>
+          <button type="button" data-group="files" data-panel="diffs">Changes <span id="diff-count" class="tab-count"></span></button>
+          <button type="button" data-group="shell" data-panel="shell">Terminal</button>
+          <button type="button" data-group="routines" data-panel="jobs">Routines</button>
+          <button type="button" data-group="setup" data-panel="mind">Instructions</button>
+          <button type="button" data-group="setup" data-panel="logins">Logins</button>
+          <button type="button" data-group="setup" data-panel="mcp">Plugins</button>
+          <button type="button" data-group="setup" data-panel="skills">Skills</button>
+          <button type="button" data-group="setup" data-panel="card">Card</button>
+          <button type="button" data-group="setup" data-panel="usage">Usage</button>
+        </nav>
+
+        <div class="computer-body">
+          <section id="panel-screen" class="panel on is-empty" data-panel="screen">
+            <form id="url-form" class="browser-bar">
+              <button type="button" data-browser="back" title="Back">‹</button>
+              <button type="button" data-browser="forward" title="Forward">›</button>
+              <button type="button" data-browser="reload" title="Reload">⟳</button>
+              <input id="url-input" spellcheck="false" autocomplete="off" placeholder="https://example.com" aria-label="Address" />
+              <button type="submit" class="go">Go</button>
+              <button id="screen-zoom" type="button" class="zoom" title="Zoom the screen">1×</button>
+            </form>
+            <div id="research" class="research" aria-live="polite" hidden></div>
+            <div class="screen-frame" id="screen-frame">
+              <img id="screen" alt="A live view of the agent's browser" draggable="false" />
+              <div id="screen-empty" class="screen-empty">
+                <div id="screen-empty-main" class="screen-empty-inner">
+                  <div class="screen-empty-mark">▢</div>
+                  <p>The agent opens this browser to click, sign in or fill in a form, and you watch it here. Its web searches and page reads run without it.</p>
+                  <form id="screen-open" class="screen-open">
+                    <input id="screen-open-input" spellcheck="false" autocomplete="off" autocapitalize="off" inputmode="url" placeholder="Type an address, like example.com" aria-label="Address to open" />
+                    <button type="submit" class="primary">Open</button>
+                  </form>
+                </div>
+                <div id="screen-empty-alt" class="screen-empty-inner" hidden></div>
+              </div>
+            </div>
+            <div class="live-row">
+              <button id="screen-live" type="button" class="primary">Take control</button>
+              <span class="hint">Use this screen yourself, live. Sign in to a site the agent cannot.</span>
+            </div>
+            <div class="type-row">
+              <input id="type-input" placeholder="Click a field, then type here" autocomplete="off" spellcheck="false" />
+              <button id="type-secret" type="button" class="icon-btn" title="Type a password without showing it">•••</button>
+              <button id="type-send" type="button" class="ghost">Type</button>
+              <button id="key-enter" type="button" class="ghost">Enter</button>
+              <button id="key-tab" type="button" class="ghost">Tab</button>
+            </div>
+            <div id="net-card" class="net-card" hidden>
+              <div class="net-head">
+                <label for="net-route">Open sites from</label>
+                <select id="net-route">
+                  <option value="auto">This server, or your Mac when a site blocks it</option>
+                  <option value="mac">Your Mac, for every site</option>
+                  <option value="proxy">A proxy</option>
+                  <option value="direct">This server only</option>
+                </select>
+              </div>
+              <form id="net-proxy" class="net-proxy" hidden>
+                <input id="net-proxy-input" type="password" autocomplete="off" spellcheck="false" placeholder="http://user:password@proxy.example.com:8080" aria-label="Proxy address" />
+                <button type="submit" class="ghost">Save</button>
+              </form>
+              <p id="net-state" class="hint"></p>
+              <div id="net-sites" class="net-sites" hidden></div>
+            </div>
+            <p class="panel-note">This browser is on the server. Sign in here and the session is saved in this agent's profile.</p>
+          </section>
+
+          <section id="panel-desktop" class="panel" data-panel="desktop" hidden>
+            <div class="screen-frame" id="desktop-frame">
+              <img id="desktop-screen" alt="A live view of the agent's desktop" draggable="false" />
+              <div id="desktop-empty" class="screen-empty">
+                <div class="screen-empty-mark">▣</div>
+                <p>The agent's whole screen: its browser plus any app it opens from the terminal.</p>
+                <button id="desktop-boot" type="button" class="primary">Show the whole screen</button>
+              </div>
+            </div>
+            <div class="live-row">
+              <button id="desktop-live" type="button" class="primary">Take control</button>
+              <span class="hint">Open the whole desktop live, with a real keyboard and mouse.</span>
+            </div>
+            <div class="type-row">
+              <input id="desktop-type" placeholder="Click a field, then type here" autocomplete="off" spellcheck="false" />
+              <button id="desktop-type-send" type="button" class="ghost">Type</button>
+              <button id="desktop-key-enter" type="button" class="ghost">Enter</button>
+              <button id="desktop-key-tab" type="button" class="ghost">Tab</button>
+              <button id="desktop-refresh" type="button" class="ghost">Refresh</button>
+            </div>
+            <p class="panel-note">Clicks and keys go to the real X display. The agent can open GUI apps from its shell and they appear here.</p>
+          </section>
+
+          <section id="panel-files" class="panel" data-panel="files" hidden>
+            <div class="panel-head">
+              <div>
+                <p class="kicker">Workspace</p>
+                <p id="file-path" class="mono small">/</p>
+              </div>
+              <button id="files-refresh" class="ghost" type="button">Refresh</button>
+            </div>
+            <div id="file-list" class="file-list"></div>
+            <div id="file-editor" class="file-editor" hidden>
+              <div class="panel-head">
+                <strong id="file-editor-name" class="mono small"></strong>
+                <div class="row">
+                  <button id="file-cancel" class="ghost" type="button">Close</button>
+                  <button id="file-save" class="primary" type="button">Save</button>
+                </div>
+              </div>
+              <textarea id="file-content" spellcheck="false" aria-label="File content"></textarea>
+              <p id="file-status" class="hint"></p>
+            </div>
+          </section>
+
+          <section id="panel-shell" class="panel" data-panel="shell" hidden>
+            <div class="panel-head">
+              <div>
+                <p class="kicker">Terminal</p>
+                <p id="shell-cwd" class="mono small">workspace</p>
+              </div>
+              <div class="term-head-actions">
+                <span id="term-state" class="term-state">Offline</span>
+                <button id="term-reconnect" class="ghost" type="button">Reconnect</button>
+              </div>
+            </div>
+            <div id="box-card" class="box-card" hidden>
+              <div class="box-copy">
+                <strong id="box-title">This server</strong>
+                <span id="box-detail" class="hint"></span>
+              </div>
+              <div class="box-actions">
+                <button id="box-reset" class="ghost" type="button" hidden>Reset</button>
+                <button id="box-switch" class="ghost" type="button">Use its own computer</button>
+              </div>
+            </div>
+            <div id="term" class="term-host" aria-label="Terminal"></div>
+            <div id="term-keys" class="term-keys" aria-label="Terminal keys">
+              <button type="button" data-key="esc">Esc</button>
+              <button type="button" data-key="tab">Tab</button>
+              <button type="button" data-key="ctrl-c">Ctrl C</button>
+              <button type="button" data-key="ctrl-d">Ctrl D</button>
+              <button type="button" data-key="up" aria-label="Up">&uarr;</button>
+              <button type="button" data-key="down" aria-label="Down">&darr;</button>
+            </div>
+            <details class="term-oneshot">
+              <summary>Run one command</summary>
+              <div class="term-oneshot-body">
+                <div class="term-oneshot-head">
+                  <span class="hint">Runs once and shows the output. Works without the live terminal.</span>
+                  <button id="shell-clear" class="ghost" type="button">Clear</button>
+                </div>
+                <pre id="shell-output" class="terminal" aria-live="polite">Ready. Commands run on this server, in this agent's workspace.</pre>
+                <form id="shell-form" class="shell-form">
+                  <span class="prompt-sign">$</span>
+                  <input id="shell-input" spellcheck="false" autocomplete="off" placeholder="ls -la" aria-label="Command" />
+                  <button type="submit" class="primary">Run</button>
+                </form>
+              </div>
+            </details>
+          </section>
+
+          <section id="panel-logins" class="panel" data-panel="logins" hidden>
+            <div class="panel-head">
+              <div>
+                <p class="kicker">Saved logins</p>
+                <p class="hint">Logins saved here are encrypted at rest. 1Password entries stay in 1Password and are filled on the server.</p>
+              </div>
+            </div>
+            <div id="login-list" class="stack"></div>
+            <div class="card-form" id="onepassword-card">
+              <div class="row between">
+                <p class="form-title">From 1Password</p>
+                <span id="onepassword-state" class="pill">checking</span>
+              </div>
+              <p id="onepassword-hint" class="hint">Reads Login items from 1Password on the server. The password stays on the server and is never sent to the model.</p>
+              <form id="onepassword-token-form" class="row" hidden>
+                <input id="onepassword-token" type="password" placeholder="1Password service account token" autocomplete="off" />
+                <button id="onepassword-connect" type="submit" class="ghost">Connect</button>
+              </form>
+              <div class="row">
+                <input id="onepassword-search" placeholder="Search 1Password logins" autocomplete="off" />
+                <button id="onepassword-load" class="ghost" type="button">Search</button>
+                <button id="onepassword-forget" class="ghost danger-text" type="button" hidden>Disconnect</button>
+              </div>
+              <div id="onepassword-list" class="stack compact"></div>
+            </div>
+            <form id="login-form" class="card-form">
+              <p class="form-title">Save a login</p>
+              <label>Site or URL<input id="login-site" placeholder="https://example.com" autocomplete="off" /></label>
+              <label>Username<input id="login-username" autocomplete="off" /></label>
+              <label>Password<input id="login-password" type="password" autocomplete="new-password" /></label>
+              <label>Label <span class="muted">(optional)</span><input id="login-label" autocomplete="off" placeholder="Work account" /></label>
+              <p class="hint">Passwords are encrypted with AES-256-GCM. They are never sent to the model.</p>
+              <button type="submit" class="primary">Save login</button>
+            </form>
+          </section>
+
+          <section id="panel-jobs" class="panel" data-panel="jobs" hidden>
+            <div class="panel-head">
+              <div>
+                <p class="kicker">Scheduled jobs</p>
+                <p class="hint">Runs on this server even when no browser tab is open.</p>
+              </div>
+            </div>
+            <div id="job-list" class="stack"></div>
+            <form id="job-form" class="card-form">
+              <p id="job-form-title" class="form-title">New job</p>
+              <label>Name<input id="job-name" placeholder="Morning brief" /></label>
+              <div id="schedule-picker" class="schedule-picker"></div>
+              <label>Instruction<textarea id="job-prompt" rows="3" placeholder="Check the news and leave a short brief."></textarea></label>
+              <p class="hint">Or just tell the agent: remind me every weekday at 8 to check the deploy.</p>
+              <div class="row">
+                <button id="job-submit" type="submit" class="primary">Create job</button>
+                <button id="job-cancel" type="button" class="ghost" hidden>Cancel</button>
+              </div>
+            </form>
+          </section>
+
+          <section id="panel-mind" class="panel" data-panel="mind" hidden>
+            <div class="card-form">
+              <p class="form-title">Custom instructions</p>
+              <textarea id="instructions" rows="7" spellcheck="false"></textarea>
+              <div class="row between">
+                <span id="instructions-status" class="hint"></span>
+                <button id="save-instructions" class="primary" type="button">Save instructions</button>
+              </div>
+            </div>
+            <div class="panel-head">
+              <div>
+                <p class="kicker">Live system prompt</p>
+                <p class="hint">This is exactly what the model receives, including memory and the computer.</p>
+              </div>
+              <div class="row">
+                <button id="reset-session" class="ghost" type="button">New model session</button>
+                <button id="compact-now" class="ghost" type="button">Compact now</button>
+                <button id="copy-prompt" class="ghost" type="button">Copy</button>
+              </div>
+            </div>
+            <pre id="live-prompt" class="prompt-box"></pre>
+            <div class="card-form" id="spec-card">
+              <div class="row between">
+                <p class="form-title">Spec file</p>
+                <span id="spec-state" class="pill"></span>
+              </div>
+              <p id="spec-hint" class="hint">Link a file the agent should follow. It runs on the copy you approve, and edits to the file wait for you here.</p>
+              <form id="spec-form" class="row">
+                <input id="spec-path" placeholder="~/Desktop/Projects/project/docs/spec.md" spellcheck="false" autocomplete="off" />
+                <button type="submit" class="ghost">Link</button>
+              </form>
+              <div id="spec-linked" class="stack compact" hidden>
+                <p id="spec-meta" class="mono small muted"></p>
+                <div id="spec-diff-wrap" hidden>
+                  <p class="hint">The file changed since you approved it. This is what the agent would start following:</p>
+                  <div id="spec-diff"></div>
+                </div>
+                <div class="row">
+                  <button id="spec-apply" class="primary" type="button" hidden>Apply changes</button>
+                  <button id="spec-dismiss" class="ghost" type="button" hidden>Dismiss</button>
+                  <button id="spec-view" class="ghost" type="button">View approved copy</button>
+                  <button id="spec-unlink" class="ghost" type="button">Unlink</button>
+                </div>
+                <pre id="spec-applied" class="prompt-box" hidden></pre>
+              </div>
+            </div>
+            <div class="card-form">
+              <p class="form-title">Prompt diff</p>
+              <div class="row">
+                <select id="compare-bot" aria-label="Compare with"></select>
+                <button id="compare-load" class="ghost" type="button">Compare</button>
+              </div>
+              <pre id="prompt-diff" class="prompt-box muted">Choose another agent to see what changes between their live prompts.</pre>
+            </div>
+            <div class="card-form">
+              <p class="form-title">Memory</p>
+              <p id="memory-status" class="hint"></p>
+              <div id="memory-list" class="stack compact"></div>
+              <form id="memory-form" class="row">
+                <input id="memory-input" placeholder="A durable fact" />
+                <button type="submit" class="ghost">Remember</button>
+              </form>
+            </div>
+          </section>
+
+          <section id="panel-diffs" class="panel" data-panel="diffs" hidden>
+            <div class="panel-head">
+              <div>
+                <p class="kicker">Code changes</p>
+                <p class="hint">Every edit in this agent's workspace, newest first.</p>
+              </div>
+              <button id="diffs-refresh" class="ghost" type="button">Refresh</button>
+            </div>
+            <div id="diff-list" class="stack"></div>
+          </section>
+
+          <section id="panel-saved" class="panel" data-panel="saved" hidden>
+            <div class="panel-head">
+              <div>
+                <p class="kicker">Saved work</p>
+                <p class="hint">Reports, pages, tables, charts and files this agent made for you. Every version is kept.</p>
+              </div>
+            </div>
+            <div id="saved-body" class="stack"></div>
+          </section>
+
+          <section id="panel-usage" class="panel" data-panel="usage" hidden>
+            <div class="panel-head">
+              <div>
+                <p class="kicker">Usage and spend</p>
+                <p class="hint">Every turn, with dollars and tokens, by model and by day. Cost is what the model server reports.</p>
+              </div>
+            </div>
+            <div id="usage-body" class="stack"></div>
+          </section>
+
+          <section id="panel-card" class="panel" data-panel="card" hidden>
+            <div class="panel-head">
+              <div>
+                <p class="kicker">Capability card</p>
+                <p class="hint">Measured on real tasks, not counted from what is installed.</p>
+              </div>
+            </div>
+            <div id="card-body" class="stack"></div>
+          </section>
+
+          <section id="panel-skills" class="panel" data-panel="skills" hidden>
+            <div class="panel-head">
+              <div>
+                <p class="kicker">Skills</p>
+                <p class="hint">Procedures this agent opens when a task matches. They cost nothing until used.</p>
+              </div>
+              <button id="browse-skills" class="ghost" type="button">Browse skills</button>
+            </div>
+            <div id="skill-list" class="stack"></div>
+          </section>
+
+          <section id="panel-mcp" class="panel" data-panel="mcp" hidden>
+            <div class="panel-head">
+              <div>
+                <p class="kicker">MCP and connectors</p>
+                <p class="hint">Connected servers add tools to this agent's next turn.</p>
+              </div>
+              <button id="browse-plugins" class="ghost" type="button">Browse plugins</button>
+            </div>
+            <div id="connector-list" class="stack"></div>
+            <form id="connector-form" class="card-form">
+              <p class="form-title">Add an MCP server</p>
+              <label>Name<input id="connector-name" placeholder="GitHub" /></label>
+              <label>Transport
+                <select id="connector-transport">
+                  <option value="stdio">stdio (local command)</option>
+                  <option value="http">http (remote URL)</option>
+                </select>
+              </label>
+              <label class="stdio-field">Command<input id="connector-command" placeholder="npx" /></label>
+              <label class="stdio-field">Arguments <span class="muted">one per line</span><textarea id="connector-args" rows="3" placeholder="-y&#10;@modelcontextprotocol/server-github"></textarea></label>
+              <label class="http-field" hidden>URL<input id="connector-url" placeholder="https://mcp.example.com/mcp" /></label>
+              <label>Environment <span class="muted">JSON, optional</span><textarea id="connector-env" rows="2" placeholder='{"GITHUB_TOKEN":"..."}'></textarea></label>
+              <label>Headers <span class="muted">JSON, optional</span><textarea id="connector-headers" rows="2" placeholder='{"Authorization":"Bearer ..."}'></textarea></label>
+              <button type="submit" class="primary">Connect</button>
+            </form>
+          </section>
+        </div>
+      </aside>
+
+      <div id="scrim" class="scrim"></div>
+
+      <nav id="tabbar" class="tabbar" aria-label="Main">
+        <button type="button" class="tab" data-tab="home">
+          <svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M4 10.4 12 4l8 6.4V19a1 1 0 0 1-1 1h-4.2v-5.2H9.2V20H5a1 1 0 0 1-1-1Z"></path></svg>
+          <span>Home</span><b id="tab-home-badge" class="tab-badge amber" hidden>0</b>
+        </button>
+        <button type="button" class="tab" data-tab="agents">
+          <svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8.6" r="3.3"></circle><path d="M3.2 19.6c.5-3.3 2.9-5.2 5.8-5.2s5.3 1.9 5.8 5.2"></path><path d="M15.6 5.7a3.2 3.2 0 0 1 0 5.9"></path><path d="M17.6 14.8c1.9.6 3.2 2.2 3.5 4.6"></path></svg>
+          <span>Agents</span>
+        </button>
+        <button type="button" class="tab" data-tab="inbox">
+          <svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M3.6 13.4 6.2 5.9a1 1 0 0 1 .95-.7h9.7a1 1 0 0 1 .95.7l2.6 7.5V18a1.2 1.2 0 0 1-1.2 1.2H4.8A1.2 1.2 0 0 1 3.6 18Z"></path><path d="M3.6 13.4h4.6a1 1 0 0 1 1 .9 2.9 2.9 0 0 0 5.6 0 1 1 0 0 1 1-.9h4.6"></path></svg>
+          <span>Inbox</span><b id="tab-inbox-badge" class="tab-badge" hidden>0</b>
+        </button>
+        <button type="button" class="tab" data-tab="more">
+          <svg viewBox="0 0 24 24" width="25" height="25" fill="currentColor" aria-hidden="true"><circle cx="5.8" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="18.2" cy="12" r="1.8"></circle></svg>
+          <span>More</span>
+        </button>
+      </nav>
+    </div>
+
+    <div id="sheet" class="sheet">
+      <div class="sheet-backdrop" data-sheet-close></div>
+      <div class="sheet-panel" role="menu" aria-labelledby="sheet-title">
+        <div class="sheet-grab" aria-hidden="true"></div>
+        <p id="sheet-title" class="sheet-title"></p>
+        <div id="sheet-list" class="sheet-list"></div>
+        <p id="sheet-foot" class="sheet-foot" hidden></p>
+      </div>
+    </div>
+
+    <dialog id="new-bot-dialog" class="dialog wide">
+      <form method="dialog" class="dialog-card" id="new-bot-form">
+        <header class="dialog-head">
+          <div><p class="kicker">A teammate, not a chat</p><h2>New agent</h2></div>
+          <button type="button" class="icon-btn" data-close>×</button>
+        </header>
+        <div class="dialog-body two-col">
+          <div class="stack">
+            <label>Name<input id="nb-name" placeholder="Scout" maxlength="40" required /></label>
+            <label>Group <span class="muted">optional</span><input id="nb-group" placeholder="Personal" maxlength="40" /></label>
+            <label>Job <span class="muted">what is this agent for?</span><textarea id="nb-job" rows="2" placeholder="Reads the web and keeps notes for later."></textarea></label>
+            <div id="nb-studio" class="look-card"></div>
+            <label>Custom instructions <span class="muted">optional</span><textarea id="nb-prompt" rows="5" placeholder="How should this agent work?"></textarea></label>
+          </div>
+          <div class="stack">
+            <div class="model-pick-block">
+              <p class="field-label">Model</p>
+              <div id="nb-model-pick"></div>
+              <p class="hint">From the providers connected in Settings, Models. No password needed.</p>
+            </div>
+            <details id="nb-advanced" class="advanced-server">
+              <summary>Use another server</summary>
+            <div class="detect-box">
+              <div><strong>Use a server you already run</strong><p class="hint">Find OpenCode, LM Studio, Ollama, or any OpenAI-compatible API.</p></div>
+              <button id="nb-discover" type="button" class="ghost">Find servers</button>
+            </div>
+            <label>Provider
+              <select id="nb-provider">
+                <option value="opencode">OpenCode</option>
+                <option value="openai">OpenAI-compatible</option>
+              </select>
+            </label>
+            <label>Base URL<input id="nb-base" placeholder="Server address, for example http://host:4096" /></label>
+            <label id="nb-user-field">Server username<input id="nb-user" placeholder="opencode" /></label>
+            <label id="nb-key-field">Server password or API key<input id="nb-key" type="password" autocomplete="off" placeholder="Optional" /></label>
+            <div class="row">
+              <label class="grow">Model
+                <select id="nb-model"><option value="">Choose a model…</option></select>
+                <input id="nb-model-custom" class="model-custom" placeholder="provider/model" hidden />
+              </label>
+              <button id="nb-load-models" type="button" class="ghost align-end">Refresh</button>
+            </div>
+            <label id="nb-agent-field">OpenCode agent<input id="nb-agent" placeholder="build" /></label>
+            <p id="nb-status" class="hint"></p>
+            </details>
+          </div>
+        </div>
+        <footer class="dialog-foot">
+          <span id="nb-error" class="error-text"></span>
+          <div class="row">
+            <button type="button" class="ghost" data-close>Cancel</button>
+            <button type="submit" class="primary">Create agent</button>
+          </div>
+        </footer>
+      </form>
+    </dialog>
+
+    <dialog id="settings-dialog" class="dialog wide">
+      <form method="dialog" class="dialog-card" id="settings-form">
+        <header class="dialog-head">
+          <div><p class="kicker">This agent</p><h2 id="settings-title">Settings</h2></div>
+          <button type="button" class="icon-btn" data-close>×</button>
+        </header>
+        <div class="dialog-body two-col">
+          <div class="stack">
+            <label>Name<input id="set-name" maxlength="40" required /></label>
+            <label>Group<input id="set-group" maxlength="40" placeholder="Personal" /></label>
+            <label>Job<textarea id="set-job" rows="2"></textarea></label>
+            <div class="settings-block">
+              <p class="field-label">Placement</p>
+              <label class="row between"><span>Pin to the top</span><input id="set-pin" type="checkbox" /></label>
+              <label class="row between"><span>Main agent</span><input id="set-main" type="checkbox" /></label>
+              <p class="hint">The main agent gets a gold star and sits first. Pinned agents stay above the groups.</p>
+            </div>
+            <div class="settings-block">
+              <p class="field-label">Availability</p>
+              <label class="row between"><span>Pause this agent</span><input id="set-paused" type="checkbox" /></label>
+              <p class="hint">A paused agent still answers you. Its routines do not run, and other agents and @mentions cannot reach it until you turn it back on.</p>
+            </div>
+            <div id="set-studio" class="look-card"></div>
+            <div class="card-form flat">
+              <p class="form-title">Danger zone</p>
+              <p class="hint">Clearing the chat removes this agent's conversation. Its memory, workspace, logins and jobs stay.</p>
+              <button id="clear-chat" type="button" class="danger">Clear chat</button>
+              <p class="hint">Deleting an agent removes its workspace, browser profile, logins, and jobs from this server.</p>
+              <button id="delete-bot" type="button" class="danger">Delete agent</button>
+            </div>
+          </div>
+          <div class="stack">
+            <div class="model-pick-block">
+              <p class="field-label">Model</p>
+              <div id="set-model-pick"></div>
+            </div>
+            <div class="model-pick-block">
+              <p class="field-label">Backup models</p>
+              <p class="hint">Tried in order when the model above fails at its provider: an outage, a rate limit, an expired sign-in.</p>
+              <div id="set-backups" class="backup-list"></div>
+              <button id="set-backup-add" type="button" class="ghost">Add a backup model</button>
+            </div>
+            <details id="set-advanced" class="advanced-server">
+              <summary>Use another server</summary>
+            <label>Provider
+              <select id="set-provider">
+                <option value="opencode">OpenCode</option>
+                <option value="openai">OpenAI-compatible</option>
+              </select>
+            </label>
+            <label>Base URL<input id="set-base" /></label>
+            <label id="set-user-field">Server username<input id="set-user" /></label>
+            <label id="set-key-field">Server password or API key<input id="set-key" type="password" autocomplete="off" placeholder="Leave blank to keep the saved secret" /></label>
+            <label>Model
+              <select id="set-model"><option value="">Choose a model…</option></select>
+              <input id="set-model-custom" class="model-custom" placeholder="provider/model" hidden />
+            </label>
+            <label id="set-agent-field">OpenCode agent<input id="set-agent" placeholder="build" /></label>
+            <div class="row">
+              <button id="set-load-models" type="button" class="ghost">Refresh models</button>
+              <span id="set-status" class="hint"></span>
+            </div>
+            </details>
+            <div class="settings-block">
+              <p class="field-label">Notifications</p>
+              <label>Send this agent's activity to my devices
+                <select id="set-notify">
+                  <option value="all">All activity</option>
+                  <option value="important">Important only</option>
+                  <option value="off">Off</option>
+                </select>
+              </label>
+              <p class="hint">Approvals always reach you. Important covers replies you are not watching, messages, reminders, routines and failures.</p>
+            </div>
+            <div class="settings-block" id="permissions-block">
+              <p class="field-label">Permissions</p>
+              <p class="hint">What this agent may do without asking you. Ravnir enforces these on the server, and every request shows up in Home and in the thread.</p>
+              <div class="perm">
+                <div class="perm-head"><strong>Terminal commands</strong><span>Run commands on the server</span></div>
+                <div class="seg" id="perm-shell" role="radiogroup" aria-label="Terminal commands">
+                  <button type="button" role="radio" data-value="ask">Ask first</button>
+                  <button type="button" role="radio" data-value="allow">Always allow</button>
+                  <button type="button" role="radio" data-value="deny">Never</button>
+                </div>
+              </div>
+              <div class="perm">
+                <div class="perm-head"><strong>Always allowed commands</strong><span>These run without asking</span></div>
+                <div id="perm-chips" class="rule-chips"></div>
+                <div class="row">
+                  <input id="perm-add" class="mono" placeholder="git status *" spellcheck="false" autocomplete="off" aria-label="Add a command rule" />
+                  <button id="perm-add-btn" type="button" class="ghost">Add</button>
+                </div>
+                <p class="hint">Use * as a wildcard. The Always allow button in an approval adds a rule here.</p>
+              </div>
+              <div class="perm">
+                <div class="perm-head"><strong>Files outside the workspace</strong><span>Read or change other folders</span></div>
+                <div class="seg" id="perm-files" role="radiogroup" aria-label="Files outside the workspace">
+                  <button type="button" role="radio" data-value="ask">Ask first</button>
+                  <button type="button" role="radio" data-value="allow">Always allow</button>
+                  <button type="button" role="radio" data-value="deny">Never</button>
+                </div>
+              </div>
+              <div class="perm">
+                <div class="perm-head"><strong>Saved logins</strong><span>Sign in to sites for you</span></div>
+                <div class="seg" id="perm-logins" role="radiogroup" aria-label="Saved logins">
+                  <button type="button" role="radio" data-value="ask">Ask first</button>
+                  <button type="button" role="radio" data-value="allow">Always allow</button>
+                  <button type="button" role="radio" data-value="deny">Never</button>
+                </div>
+              </div>
+              <div class="perm">
+                <div class="perm-head"><strong>Plugin actions</strong><span>Send, create or change things in a connected service</span></div>
+                <div class="seg two" id="perm-plugins" role="radiogroup" aria-label="Plugin actions">
+                  <button type="button" role="radio" data-value="ask">Ask first</button>
+                  <button type="button" role="radio" data-value="allow">Always allow</button>
+                </div>
+              </div>
+            </div>
+            <div class="settings-block">
+              <p class="field-label">Daily cap</p>
+              <p class="hint">When the agent reaches a cap, new turns and routines are skipped until midnight. Leave 0 for no cap.</p>
+              <div class="row">
+                <label class="grow">Cost in USD<input id="set-cap-cost" type="number" min="0" step="0.0001" inputmode="decimal" /></label>
+                <label class="grow">Tokens<input id="set-cap-tokens" type="number" min="0" step="1000" inputmode="numeric" /></label>
+              </div>
+            </div>
+            <div class="settings-block">
+              <p class="field-label">Monthly cap</p>
+              <p class="hint">Same idea over the calendar month. Leave 0 for no cap.</p>
+              <div class="row">
+                <label class="grow">Cost in USD<input id="set-cap-month-cost" type="number" min="0" step="0.01" inputmode="decimal" /></label>
+                <label class="grow">Tokens<input id="set-cap-month-tokens" type="number" min="0" step="10000" inputmode="numeric" /></label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <footer class="dialog-foot">
+          <span id="set-error" class="error-text"></span>
+          <div class="row">
+            <button type="button" class="ghost" data-close>Cancel</button>
+            <button type="submit" class="primary">Save</button>
+          </div>
+        </footer>
+      </form>
+    </dialog>
+
+    <dialog id="discover-dialog" class="dialog">
+      <div class="dialog-card">
+        <header class="dialog-head">
+          <div><p class="kicker">Local servers</p><h2>Find models</h2></div>
+          <button type="button" class="icon-btn" data-close>×</button>
+        </header>
+        <div class="dialog-body">
+          <p class="hint" id="discover-status">Scanning this machine…</p>
+          <div id="discover-list" class="stack"></div>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="ask-dialog" class="dialog ask-dialog">
+      <form method="dialog" class="dialog-card" id="ask-form">
+        <header class="dialog-head">
+          <div><p id="ask-kicker" class="kicker"></p><h2 id="ask-title"></h2></div>
+          <button type="button" class="icon-btn" data-ask-cancel aria-label="Close">×</button>
+        </header>
+        <div class="dialog-body">
+          <p id="ask-message" class="hint ask-message"></p>
+          <label id="ask-field"><span id="ask-label">Name</span><input id="ask-input" maxlength="40" autocomplete="off" /></label>
+        </div>
+        <footer class="dialog-foot">
+          <span id="ask-error" class="error-text"></span>
+          <div class="row">
+            <button type="button" class="ghost" data-ask-cancel>Cancel</button>
+            <button id="ask-ok" type="submit" class="primary">OK</button>
+          </div>
+        </footer>
+      </form>
+    </dialog>
+
+    <dialog id="switcher" class="dialog switcher" aria-label="Switch agent">
+      <div class="dialog-card switcher-card">
+        <input id="switcher-input" class="switcher-input" placeholder="Go to an agent" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="switcher-list" />
+        <div id="switcher-list" class="switcher-list" role="listbox"></div>
+        <p class="switcher-foot hint">Up and down to choose, Enter to open, Esc to close.</p>
+      </div>
+    </dialog>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <!-- Voice mode: a full sheet that talks to the open agent. Shown by voice.js. -->
+    <section id="voice-sheet" class="voice-sheet" role="dialog" aria-modal="true" aria-labelledby="voice-name" data-phase="idle" hidden>
+      <div class="voice-top">
+        <span class="voice-kicker">Voice</span>
+        <button id="voice-end" class="voice-end" type="button">End</button>
+      </div>
+      <div class="voice-stage">
+        <div id="voice-avatar" class="voice-avatar avatar" aria-hidden="true"></div>
+        <h2 id="voice-name">Agent</h2>
+        <p id="voice-state" class="voice-state" role="status" aria-live="polite">Tap to talk</p>
+        <p id="voice-line" class="voice-line"></p>
+      </div>
+      <div class="voice-foot">
+        <button id="voice-orb" class="voice-orb" type="button" aria-label="Start talking"><span class="voice-orb-core" aria-hidden="true"></span></button>
+        <p class="voice-hint">Speak, then pause. Tap the circle to interrupt.</p>
+      </div>
+    </section>
+
+    <script src="/avatar.js"></script>
+    <script src="/highlight.js"></script>
+    <script src="/markdown.js"></script>
+    <script src="/charts.js"></script>
+    <script src="/diagrams.js"></script>
+    <script src="/choices.js"></script>
+    <script src="/questions.js"></script>
+    <script src="/suggestions.js"></script>
+    <script src="/pdfview.js"></script>
+    <script src="/artifacts.js"></script>
+    <script src="/models.js"></script>
+    <script src="/studio.js"></script>
+    <script src="/app.js"></script>
+    <script src="/attach.js"></script>
+    <script src="/home.js"></script>
+    <script src="/schedule.js"></script>
+    <script src="/notifications.js"></script>
+    <script src="/plugins.js"></script>
+    <script src="/skills.js"></script>
+    <script src="/card.js"></script>
+    <script src="/memory.js"></script>
+    <script src="/settings.js"></script>
+    <script src="/welcome.js"></script>
+    <script src="/terminal.js"></script>
+    <script src="/network.js"></script>
+    <script src="/live.js"></script>
+    <script type="module" src="/voice.js"></script>
+  </body>
+</html>

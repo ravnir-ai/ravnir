@@ -1,0 +1,100 @@
+/* Chat markdown (public/markdown.js). Everything lives under .md so it only applies where render() ran. */
+.md { line-height: 1.5; }
+.md > :first-child { margin-top: 0; }
+.md > :last-child { margin-bottom: 0; }
+.md p { margin: 0 0 10px; }
+.md strong { font-weight: 600; }
+.md del { opacity: 0.7; }
+.md a { color: var(--accent); overflow-wrap: anywhere; }
+
+.md .md-h1, .md .md-h2, .md .md-h3, .md .md-h4, .md .md-h5, .md .md-h6 { font-family: var(--display); line-height: 1.3; letter-spacing: -0.015em; margin: 14px 0 5px; }
+.md .md-h1 { font-size: 19px; font-weight: 700; }
+.md .md-h2 { font-size: 17px; font-weight: 700; }
+.md .md-h3 { font-size: 15.5px; font-weight: 650; }
+.md .md-h4, .md .md-h5, .md .md-h6 { font-size: 14.5px; font-weight: 650; }
+.md .md-h5, .md .md-h6 { color: var(--muted); }
+.md .md-hr { border: 0; border-top: 1px solid var(--line); margin: 14px 0; }
+
+.md ul, .md ol { margin: 0 0 10px; padding-left: 22px; }
+.md li { margin: 3px 0; }
+.md li > ul, .md li > ol { margin: 4px 0 2px; }
+.md li > p { margin: 6px 0 0; }
+.md li > .md-code, .md li > .md-table-box, .md li > .md-quote, .md li > .md-callout { margin: 8px 0; }
+.md li.md-task { list-style: none; margin-left: -18px; }
+.md li.md-task > input { margin: 0 7px 0 0; vertical-align: -1px; accent-color: var(--accent); }
+
+.md .md-quote { margin: 8px 0; padding: 1px 0 1px 12px; border-left: 3px solid var(--hairline); color: var(--muted); }
+.md .md-quote p:last-child { margin-bottom: 0; }
+
+.md .md-callout { --co: var(--accent); margin: 10px 0; padding: 9px 12px 9px 13px; border-radius: var(--r-sm); border-left: 3px solid var(--co); background: var(--info-bg); color: var(--text); }
+.md .md-callout-tip { --co: var(--green-deep); background: var(--ok-bg); }
+.md .md-callout-important { --co: var(--gold-fg); background: var(--gold-bg); }
+.md .md-callout-warning { --co: var(--amber); background: var(--warn-bg); }
+.md .md-callout-caution { --co: var(--red); background: var(--red-soft); }
+.md .md-callout-title { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; color: var(--co); font-size: 12.5px; font-weight: 650; letter-spacing: 0.01em; }
+.md .md-callout-icon { flex: none; }
+.md .md-callout-body > :last-child { margin-bottom: 0; }
+
+.md .md-img-link { display: inline-block; max-width: 100%; }
+.md .md-img { display: block; max-width: 100%; max-height: 360px; border-radius: var(--r-sm); margin: 4px 0; }
+
+/* Code blocks stay dark in both themes. */
+.md .md-code { margin: 10px 0; background: var(--code-bg); color: #f5f5f7; border-radius: var(--r-md); overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06); }
+.md .md-code-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 6px 5px 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.09); font-size: 11.5px; color: rgba(245, 245, 247, 0.62); }
+.md .md-code-lang { font-family: var(--mono); letter-spacing: 0.01em; }
+.md .md-code pre { margin: 0; padding: 12px 14px; overflow: auto; background: none; border-radius: 0; }
+.md .md-code pre code { display: block; padding: 0; background: none; color: #f5f5f7; font-family: var(--mono); font-size: 12px; line-height: 1.55; white-space: pre; border-radius: 0; }
+.md .md-code .md-copy { background: rgba(255, 255, 255, 0.1); color: rgba(245, 245, 247, 0.85); }
+.md .md-code .md-copy:hover { background: rgba(255, 255, 255, 0.18); }
+
+.md .md-copy, .md .md-more { appearance: none; border: 0; font: inherit; font-size: 11.5px; line-height: 1.2; padding: 4px 9px; border-radius: 7px; cursor: pointer; background: var(--fill); color: var(--muted); }
+.md .md-copy:hover, .md .md-more:hover { background: var(--fill-strong); color: var(--text); }
+.md .md-copy:focus-visible, .md .md-more:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.md .md-block { margin: 10px 0; }
+.md .md-block > :first-child { margin-top: 0; }
+.md .md-block > :last-child { margin-bottom: 0; }
+
+/* Tables */
+.md .md-table-box { margin: 10px 0; max-width: 100%; }
+.md .md-table-bar { display: flex; justify-content: flex-end; margin-bottom: 3px; }
+.md .md-table-bar .md-copy { font-size: 11px; padding: 2px 8px; }
+@media (hover: hover) {
+  .md .md-table-bar .md-copy { opacity: 0; transition: opacity 0.12s ease; }
+  .md .md-table-box:hover .md-table-bar .md-copy, .md .md-table-box:focus-within .md-table-bar .md-copy { opacity: 1; }
+}
+.md .md-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); }
+.md .md-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; line-height: 1.4; }
+.md .md-table th, .md .md-table td { padding: 6px 10px; text-align: left; vertical-align: top; border-top: 1px solid var(--line-soft); }
+.md .md-table th + th, .md .md-table td + td { border-left: 1px solid var(--line-soft); }
+.md .md-table thead th { background: var(--fill); border-top: 0; font-weight: 600; white-space: nowrap; }
+.md .md-table td code { font-size: 0.9em; }
+.md .md-table .md-al-left { text-align: left; }
+.md .md-table .md-al-center { text-align: center; }
+.md .md-table .md-al-right { text-align: right; }
+.md .md-table .md-num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* Bubbles break long words anywhere; inside a table that splits prices and ids, so cells wrap only at spaces
+   and the table scrolls sideways instead. Right-aligned columns are figures: keep them on one line. */
+.md .md-table th, .md .md-table td { overflow-wrap: normal; word-break: normal; }
+.md .md-table td.md-al-right, .md .md-table th.md-al-right { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.md .md-more { display: block; width: 100%; margin-top: 4px; padding: 6px 10px; text-align: center; }
+
+/* Your own bubbles are blue with white text. */
+.msg.user .md a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+.msg.user .md code { background: rgba(255, 255, 255, 0.2); color: #fff; }
+.msg.user .md .md-quote { border-left-color: rgba(255, 255, 255, 0.55); color: inherit; }
+.msg.user .md .md-hr { border-top-color: rgba(255, 255, 255, 0.35); }
+.msg.user .md .md-h5, .msg.user .md .md-h6 { color: inherit; }
+.msg.user .md .md-callout { --co: #fff; background: rgba(255, 255, 255, 0.18); color: #fff; }
+.msg.user .md .md-table-wrap { background: rgba(255, 255, 255, 0.1); border-color: currentColor; }
+.msg.user .md .md-table th, .msg.user .md .md-table td { border-color: rgba(255, 255, 255, 0.28); }
+.msg.user .md .md-table thead th { background: rgba(255, 255, 255, 0.18); }
+.msg.user .md .md-table code { background: rgba(255, 255, 255, 0.2); }
+.msg.user .md .md-table-bar .md-copy, .msg.user .md .md-more { background: rgba(255, 255, 255, 0.2); color: #fff; }
+.msg.user .md li.md-task > input { accent-color: #fff; }
+.msg.user .md .md-code { background: rgba(0, 0, 0, 0.32); box-shadow: none; }
+.msg.user .md .md-code pre code { background: none; }
+
+/* A chart or diagram inside your own blue bubble sits on a light card so its colours still read. */
+.msg.user .md .md-block { background: var(--surface); color: var(--text); border-radius: var(--r-sm); padding: 8px 10px; }
+.md .md-plain { white-space: pre-wrap; font-size: 13px; }

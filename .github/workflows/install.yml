@@ -1,0 +1,57 @@
+# The install from a clean Ubuntu 24.04 machine, with rootless Podman and with Docker, on every
+# release (and by hand from the Actions tab). It checks doctor passes and that a rerun keeps the
+# data and the password.
+name: Install
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: [podman, docker]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install
+        run: |
+          start=$(date +%s)
+          ./install.sh --runtime ${{ matrix.runtime }} --access local --yes
+          echo "Install with ${{ matrix.runtime }}: $(( $(date +%s) - start )) s" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Doctor
+        run: ./install.sh doctor
+
+      - name: An agent and the password survive a rerun
+        run: |
+          . ~/.config/ravnir/ravnir.env
+          curl -fsS -u "$RAVNIR_USER:$RAVNIR_PASSWORD" -H 'content-type: application/json' \
+            -d '{"name":"Keeper","job":"Proves the data survives."}' http://127.0.0.1:3847/api/bots > /dev/null
+          before="$RAVNIR_PASSWORD"
+          ./install.sh --yes
+          . ~/.config/ravnir/ravnir.env
+          test "$before" = "$RAVNIR_PASSWORD"
+          curl -fsS -u "$RAVNIR_USER:$RAVNIR_PASSWORD" http://127.0.0.1:3847/api/state | grep -q '"name":"Keeper"'
+
+      - name: Memory with three agents and their browsers open
+        run: |
+          . ~/.config/ravnir/ravnir.env
+          auth="$RAVNIR_USER:$RAVNIR_PASSWORD"
+          for name in One Two; do
+            curl -fsS -u "$auth" -H 'content-type: application/json' -d "{\"name\":\"$name\",\"job\":\"Test.\"}" http://127.0.0.1:3847/api/bots > /dev/null
+          done
+          for id in $(curl -fsS -u "$auth" http://127.0.0.1:3847/api/state | jq -r '.bots[].id'); do
+            curl -fsS -u "$auth" -H 'content-type: application/json' -d '{"action":"navigate","url":"https://en.wikipedia.org/wiki/Common_raven"}' "http://127.0.0.1:3847/api/bots/$id/browser" > /dev/null
+          done
+          sleep 15
+          echo "Memory, three browsers open (${{ matrix.runtime }}): $(${{ matrix.runtime }} stats --no-stream --format '{{.MemUsage}}' ravnir)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Logs on failure
+        if: failure()
+        run: ${{ matrix.runtime }} logs ravnir || true

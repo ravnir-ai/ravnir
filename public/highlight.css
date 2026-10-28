@@ -1,0 +1,16 @@
+.hl-keyword { color: #FC5FA3; }
+.hl-string { color: #FC6A5D; }
+.hl-comment { color: #7F8C98; }
+.hl-number { color: #D0BF69; }
+.hl-function { color: #67B7A4; }
+.hl-type { color: #5DD8FF; }
+.hl-property { color: #A770F0; }
+.hl-builtin { color: #A770F0; }
+.hl-tag { color: #5DD8FF; }
+.hl-attr { color: #D0A8FF; }
+.hl-variable { color: #41A1C0; }
+.hl-meta { color: #FD8F3F; }
+.hl-inserted { background-color: rgba(48, 209, 88, 0.16); color: #8BE09A; }
+.hl-deleted { background-color: rgba(255, 69, 58, 0.16); color: #FF8A80; }
+.hl-heading { color: #FFFFFF; font-weight: 700; }
+.hl-operator, .hl-punctuation, .hl-text { color: inherit; }

@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Sign in to Ravnir</title>
+    <meta name="theme-color" content="#f5f5f7" />
+    <meta name="robots" content="noindex" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="icon" href="/favicon.png?v=companion-20261025" type="image/png" />
+    <link rel="apple-touch-icon" href="/icon-512.png?v=companion-20261025" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      // Same theme as the app (Settings > Appearance). System follows the device.
+      try {
+        // Settings saved while the app was called TrueBot move to their new keys once.
+        var legacy = [];
+        for (var i = 0; i < localStorage.length; i += 1) {
+          if (String(localStorage.key(i)).indexOf("truebot.") === 0) legacy.push(localStorage.key(i));
+        }
+        for (var j = 0; j < legacy.length; j += 1) {
+          var moved = "ravnir." + legacy[j].slice(8);
+          if (localStorage.getItem(moved) === null) localStorage.setItem(moved, localStorage.getItem(legacy[j]));
+          localStorage.removeItem(legacy[j]);
+        }
+        var theme = localStorage.getItem("ravnir.theme");
+        document.documentElement.setAttribute("data-theme", theme === "light" || theme === "dark" ? theme : "system");
+      } catch (error) {
+        document.documentElement.setAttribute("data-theme", "system");
+      }
+    </script>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f5f7;
+        --surface: #ffffff;
+        --line: rgba(0, 0, 0, 0.085);
+        --text: #1d1d1f;
+        --muted: #6e6e73;
+        --faint: #86868b;
+        --accent: #0071e3;
+        --red: #d70015;
+        --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        --on-strong: #ffffff;
+        --strong-hover: #3a3a3c;
+        --strong-active: #000000;
+        --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.03), 0 10px 30px rgba(0, 0, 0, 0.045);
+      }
+      :root[data-theme="dark"] {
+        color-scheme: dark;
+        --bg: #000000;
+        --surface: #1c1c1e;
+        --line: rgba(255, 255, 255, 0.14);
+        --text: #f5f5f7;
+        --muted: #a1a1a6;
+        --faint: #8e8e93;
+        --accent: #0a84ff;
+        --red: #ff6961;
+        --on-strong: #1d1d1f;
+        --strong-hover: #dcdce0;
+        --strong-active: #ffffff;
+        --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.35);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]):not([data-theme="dark"]) {
+          color-scheme: dark;
+          --bg: #000000;
+          --surface: #1c1c1e;
+          --line: rgba(255, 255, 255, 0.14);
+          --text: #f5f5f7;
+          --muted: #a1a1a6;
+          --faint: #8e8e93;
+          --accent: #0a84ff;
+          --red: #ff6961;
+          --on-strong: #1d1d1f;
+          --strong-hover: #dcdce0;
+          --strong-active: #ffffff;
+          --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font: 16px/1.5 var(--sans);
+        letter-spacing: -0.008em;
+        -webkit-font-smoothing: antialiased;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      }
+      main { width: 100%; max-width: 380px; }
+      .brand { display: flex; align-items: center; gap: 12px; margin: 0 0 28px; font-size: 15px; font-weight: 600; letter-spacing: -0.02em; }
+      .mark { width: 32px; height: 32px; border-radius: 9px; object-fit: cover; display: block; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.08); }
+      h1 { font-size: 30px; line-height: 1.1; letter-spacing: -0.034em; font-weight: 600; margin: 0 0 20px; }
+      form { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow-card); padding: 20px; display: grid; gap: 14px; }
+      label { display: grid; gap: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
+      input {
+        width: 100%;
+        height: 46px;
+        padding: 0 14px;
+        font: 16px var(--sans);
+        color: var(--text);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+        transition: border-color 0.14s ease, box-shadow 0.14s ease;
+      }
+      input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.16); }
+      button {
+        height: 46px;
+        border: 0;
+        border-radius: 12px;
+        background: var(--text);
+        color: var(--on-strong);
+        font: 500 16px var(--sans);
+        cursor: pointer;
+        transition: background 0.14s ease, opacity 0.14s ease;
+      }
+      button:hover { background: var(--strong-hover); }
+      button:active { background: var(--strong-active); }
+      button:disabled { opacity: 0.55; cursor: default; }
+      button:focus-visible { outline: 3px solid rgba(0, 113, 227, 0.4); outline-offset: 2px; }
+      .error { margin: 0; min-height: 1.5em; font-size: 14px; color: var(--red); }
+      .error:empty { display: none; }
+      .switch { margin: 16px 0 0; text-align: center; font-size: 14px; color: var(--muted); }
+      .switch a { color: var(--accent); text-decoration: none; }
+      .switch a:hover { text-decoration: underline; }
+      .hint { margin: 0; font-size: 14px; color: var(--muted); }
+      #code { text-transform: uppercase; letter-spacing: 0.12em; font-variant-numeric: tabular-nums; }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="brand"><img class="mark" src="/logo.png?v=companion-20261025" alt="" /><strong>Ravnir</strong></div>
+      <h1>Sign in to Ravnir</h1>
+      <form id="form" method="post" action="/api/login">
+        <label>Username
+          <input id="username" name="username" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required autofocus />
+        </label>
+        <label>Password
+          <input id="password" name="password" type="password" autocomplete="current-password" required />
+        </label>
+        <p id="error" class="error" role="alert" aria-live="polite"></p>
+        <button id="submit" type="submit">Sign in</button>
+      </form>
+      <form id="pair-form" hidden>
+        <p class="hint">Make a code on a screen that is already signed in: Settings, Security, Add a device.</p>
+        <label>Pairing code
+          <input id="code" name="code" type="text" inputmode="text" autocomplete="one-time-code" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="12" placeholder="ABCD-EFGH" required />
+        </label>
+        <p id="pair-error" class="error" role="alert" aria-live="polite"></p>
+        <button id="pair-submit" type="submit">Sign in</button>
+      </form>
+      <p class="switch"><a id="switch" href="#">Use a pairing code</a></p>
+    </main>
+    <script>
+      (function () {
+        var form = document.getElementById("form");
+        var error = document.getElementById("error");
+        var submit = document.getElementById("submit");
+        var password = document.getElementById("password");
+
+        // Only a path on this site: one leading slash, no "//" or "/\" tricks, never back to the login page.
+        function nextPath() {
+          var next = new URLSearchParams(location.search).get("next") || "";
+          var ok = /^\/(?![\/\\])/.test(next) && !/[\u0000-\u001f\u007f]/.test(next) && !/^\/login(?:[?#\/]|$)/.test(next);
+          return ok ? next : "/";
+        }
+
+        // A pairing code signs in a phone without typing the password. /login?pair=1 opens it directly.
+        var pairForm = document.getElementById("pair-form");
+        var code = document.getElementById("code");
+        var pairError = document.getElementById("pair-error");
+        var pairSubmit = document.getElementById("pair-submit");
+        var toggle = document.getElementById("switch");
+        function showPair(on) {
+          form.hidden = on;
+          pairForm.hidden = !on;
+          toggle.textContent = on ? "Use the password instead" : "Use a pairing code";
+          (on ? code : form.username).focus();
+        }
+        toggle.addEventListener("click", function (event) {
+          event.preventDefault();
+          showPair(pairForm.hidden);
+        });
+        if (new URLSearchParams(location.search).get("pair")) showPair(true);
+        pairForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+          pairError.textContent = "";
+          pairSubmit.disabled = true;
+          fetch("/api/login", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ code: code.value }),
+          })
+            .then(function (response) {
+              if (response.ok) {
+                location.replace(nextPath());
+                return;
+              }
+              pairError.textContent = response.status >= 500 ? "Something went wrong. Try again." : "That code is wrong or has expired. Make a new one.";
+              code.select();
+              pairSubmit.disabled = false;
+            })
+            .catch(function () {
+              pairError.textContent = "Could not reach the server. Try again.";
+              pairSubmit.disabled = false;
+            });
+        });
+
+        form.addEventListener("submit", function (event) {
+          event.preventDefault();
+          error.textContent = "";
+          submit.disabled = true;
+          fetch("/api/login", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ username: form.username.value, password: password.value }),
+          })
+            .then(function (response) {
+              if (response.ok) {
+                location.replace(nextPath());
+                return;
+              }
+              error.textContent = response.status >= 500 ? "Something went wrong. Try again." : "That did not match. Try again.";
+              password.value = "";
+              password.focus();
+              submit.disabled = false;
+            })
+            .catch(function () {
+              error.textContent = "Could not reach the server. Try again.";
+              submit.disabled = false;
+            });
+        });
+      })();
+    </script>
+  </body>
+</html>

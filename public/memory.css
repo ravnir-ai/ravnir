@@ -1,0 +1,103 @@
+/* The Memory page (public/memory.js): changes, notes, the sheet for one change, backup. */
+.memory-body { max-width: 860px; width: 100%; margin: 0 auto; gap: 22px; }
+.mem-section { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.mem-title { margin: 0; font-family: var(--display); font-size: 15px; font-weight: 600; letter-spacing: -0.02em; }
+.mem-sub { margin: 4px 0 0; font-size: 13px; font-weight: 600; }
+.mem-section .hint { margin: 0; }
+.mem-empty { padding: 22px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line-soft); }
+.mem-empty p { margin: 6px 0 0; }
+
+.mem-tabs { display: flex; align-items: center; gap: 4px; padding: 3px; width: fit-content; max-width: 100%; border-radius: 99px; background: var(--fill); }
+.mem-tab { border: 0; background: transparent; padding: 6px 16px; min-height: 32px; border-radius: 99px; font: inherit; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; }
+.mem-tab.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); }
+.mem-stats { padding: 0 10px 0 8px; font-size: 11.5px; color: var(--faint); white-space: nowrap; }
+
+/* Waiting for you */
+.mem-waiting { padding: 14px 16px 16px; border-radius: var(--r-lg); background: var(--warn-bg); border: 1px solid color-mix(in srgb, var(--amber) 32%, transparent); box-shadow: inset 3px 0 0 var(--amber); }
+.mem-proposal { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line-soft); min-width: 0; }
+.mem-proposal-head { display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: wrap; }
+.mem-proposal-head .avatar { flex: none; width: 24px; height: 24px; }
+.mem-proposal-note { font-family: var(--mono); font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.mem-proposal-section, .mem-proposal-why { margin: 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.mem-proposal-why { color: var(--text); }
+.mem-code { margin: 0; padding: 9px 11px; border-radius: var(--r-xs); background: var(--fill); color: var(--text); font-family: var(--mono); font-size: 12px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 220px; overflow: auto; }
+.mem-actions { display: flex; gap: 8px; }
+.mem-actions button { min-height: 40px; padding-inline: 18px; }
+
+/* Timeline */
+.mem-filters { display: flex; gap: 8px; flex-wrap: wrap; }
+.mem-filters select { flex: 0 1 200px; min-width: 0; }
+.mem-filters input { flex: 1 1 200px; min-width: 0; }
+.mem-timeline { display: flex; flex-direction: column; }
+.mem-entry { display: flex; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line-soft); min-width: 0; }
+.mem-entry:last-child { border-bottom: 0; }
+.mem-entry > .avatar { flex: none; width: 28px; height: 28px; margin-top: 2px; }
+.mem-entry.undone .mem-entry-summary { text-decoration: line-through; text-decoration-color: var(--faint); color: var(--muted); }
+.mem-entry-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.mem-entry-open { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; min-height: 44px; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; border-radius: var(--r-xs); }
+.mem-entry-open:hover .mem-entry-summary { color: var(--accent); }
+.mem-entry-open:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mem-entry-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; font-size: 12.5px; }
+.mem-entry-top > strong { min-width: 0; overflow-wrap: anywhere; }
+.mem-entry-time { font-size: 11.5px; color: var(--faint); }
+.mem-entry-summary { font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
+.mem-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; min-width: 0; }
+.mem-chip { max-width: 100%; border: 1px solid var(--line-soft); background: var(--surface); border-radius: 99px; padding: 3px 10px; min-height: 26px; font: inherit; font-family: var(--mono); font-size: 11px; color: var(--muted); cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mem-chip:hover { color: var(--accent); border-color: var(--accent); }
+.mem-chip.missing { cursor: default; border-style: dashed; color: var(--faint); }
+.mem-chip.missing:hover { color: var(--faint); border-color: var(--line-soft); }
+.mem-more-files { font-size: 11px; color: var(--faint); }
+.mem-more { align-self: center; margin-top: 10px; min-height: 40px; }
+
+/* Notes */
+.mem-notes { display: flex; flex-direction: column; gap: 6px; }
+.mem-group { border: 1px solid var(--line-soft); border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
+.mem-group > summary { padding: 11px 14px; min-height: 44px; display: flex; align-items: center; font-size: 13px; font-weight: 600; cursor: pointer; }
+.mem-note { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; width: 100%; min-height: 44px; padding: 8px 14px; border: 0; border-top: 1px solid var(--line-soft); background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.mem-note:hover { background: var(--fill); }
+.mem-note-title { font-size: 14px; overflow-wrap: anywhere; }
+.mem-note-path { font-family: var(--mono); font-size: 11px; color: var(--faint); overflow-wrap: anywhere; }
+
+/* Forms */
+.mem-row { display: flex; gap: 8px; }
+.mem-row input { flex: 1; min-width: 0; }
+.mem-form { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; max-width: 460px; }
+.mem-form input[type="password"], .mem-form input[type="file"] { width: 100%; }
+.mem-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); min-height: 32px; }
+.mem-restore { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; padding-top: 16px; border-top: 1px solid var(--line-soft); }
+.mem-restore .hint { margin: 0; }
+
+/* The sheet for one change or note */
+.mem-sheet-titles { min-width: 0; }
+.mem-sheet-titles h2 { overflow-wrap: anywhere; }
+.mem-sheet-body { gap: 10px; }
+.mem-detail-meta { margin: 0; font-size: 12.5px; color: var(--muted); }
+.mem-detail-meta code { font-family: var(--mono); font-size: 11.5px; }
+.mem-prompt { margin: 0; padding: 8px 11px; border-radius: var(--r-xs); background: var(--fill); font-size: 12.5px; line-height: 1.45; color: var(--muted); overflow-wrap: anywhere; }
+.mem-prompt-label { font-weight: 600; color: var(--faint); }
+.mem-body { margin: 0; font-size: 13px; color: var(--muted); white-space: pre-wrap; overflow-wrap: anywhere; }
+.mem-diff { border: 1px solid var(--line-soft); border-radius: var(--r-xs); background: var(--surface-2); font-family: var(--mono); font-size: 12px; line-height: 1.5; overflow: auto; max-height: 48vh; }
+.mem-line { padding: 0 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.mem-line.add { background: var(--add-bg); color: var(--add); }
+.mem-line.del { background: var(--del-bg); color: var(--del); }
+.mem-line.hunk { color: var(--hunk); background: var(--fill); }
+.mem-line.file { color: var(--muted); font-weight: 600; padding-top: 4px; }
+.mem-diff > .hint { padding: 8px 10px; margin: 0; }
+.mem-foot { flex-wrap: wrap; }
+.mem-foot-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.mem-foot button, .mem-link { min-height: 40px; }
+.mem-link { display: inline-flex; align-items: center; text-decoration: none; padding: 0 14px; border-radius: var(--r-sm); border: 1px solid var(--line); color: var(--text); font-size: 13px; }
+.mem-note-body { min-width: 0; overflow-wrap: anywhere; }
+.mem-links { margin-top: 4px; }
+.mem-links-label { font-size: 11.5px; color: var(--faint); margin-right: 2px; }
+
+@media (max-width: 760px) {
+  .memory-body { gap: 18px; }
+  .mem-waiting { padding: 12px; }
+  .mem-actions button { flex: 1; min-height: 44px; }
+  .mem-filters select, .mem-filters input { flex: 1 1 100%; }
+  .mem-diff { max-height: 42vh; }
+  .mem-foot { gap: 10px; }
+  .mem-foot > .danger { margin-left: auto; min-height: 44px; }
+}
+.mem-filters select, .mem-filters input, .mem-section > input, .mem-row input { min-height: 38px; border-radius: var(--r-sm); }

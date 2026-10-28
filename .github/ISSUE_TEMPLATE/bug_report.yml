@@ -1,0 +1,46 @@
+name: Bug report
+description: Report something that does not work as expected.
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Use synthetic data. Remove credentials, private addresses and conversation
+        contents from logs and screenshots. For a suspected vulnerability, follow SECURITY.md.
+  - type: input
+    id: revision
+    attributes:
+      label: Version or commit
+      description: Include the commit hash or release tag you are running.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Installation and device
+      description: Operating system, container runtime or source install, browser and device.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Smallest steps that reproduce the problem with synthetic data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Sanitized diagnostics
+      description: Relevant doctor output, errors or screenshots. Review everything before sharing.

@@ -1,0 +1,17 @@
+.git
+.github
+.claude
+.playwright
+.playwright-mcp
+node_modules
+data
+video
+test
+tmp-shots
+*.log
+.DS_Store
+CLAUDE.md
+AGENTS.md
+docs/launch-plan.md
+scripts/apply-roster.mjs
+scripts/deploy-hub.sh
