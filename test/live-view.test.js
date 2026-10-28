@@ -11,7 +11,7 @@ import { BrowserManager, BrowserSession, HANDED_OVER_MESSAGE, HandedOverError } 
 import { builtinToolDefinitions, callBuiltinTool } from "../server/computer.js";
 import { createApp } from "../server/index.js";
 import {
-  HANDOVER_GUARDED_TOOLS, LiveError, LiveManager, lastVisitedUrl, NEEDS_NEW_IMAGE, novncFile, plainChromiumArgs, x11vncArgs,
+  HANDOVER_GUARDED_TOOLS, HostDriver, LiveError, LiveManager, lastVisitedUrl, NEEDS_NEW_IMAGE, novncFile, plainChromiumArgs, x11vncArgs,
 } from "../server/live.js";
 import { handleBuiltinMcp } from "../server/mcpBuiltin.js";
 import { buildSystemPrompt } from "../server/prompts.js";
@@ -465,3 +465,46 @@ function refusal(url, headers) {
     socket.on("error", () => {});
   });
 }
+
+// Ubuntu 23.10+ blocks Chromium's sandbox ("No usable sandbox!"): the sign-in browser
+// died at once and left the live view on an empty black screen.
+test("the sign-in browser opens without the sandbox where the server has none", async () => {
+  const dir = tmp("plain-sandbox");
+  const log = path.join(dir, "launches.log");
+  const chrome = path.join(dir, "chrome");
+  fs.writeFileSync(chrome, `#!/bin/sh\necho "$*" >> "${log}"\ncase " $* " in *" --no-sandbox "*) exec sleep 30 ;; esac\nexit 133\n`, { mode: 0o755 });
+  const desktop = { ensure: async () => ({ display: ":0", env: { PATH: process.env.PATH } }) };
+  const network = { plainArgs: () => ["--proxy-server=socks5://127.0.0.1:1080"] };
+  const driver = new HostDriver({ home: dir, desktop, browser: { network }, chromium: () => chrome });
+  const echo = { ...bot, id: "bot-plain-sandbox" };
+  try {
+    await driver.startPlain(echo, "https://login.example.com/");
+    let lines = fs.readFileSync(log, "utf8").trim().split("\n");
+    assert.equal(lines.length, 2);
+    assert.ok(!lines[0].includes("--no-sandbox"));
+    assert.ok(lines[1].includes("--no-sandbox"));
+    // The agent's network route reaches the plain browser too.
+    assert.ok(lines[1].includes("--proxy-server=socks5://127.0.0.1:1080"));
+    assert.equal(driver.sandbox, false);
+    driver.plain.get(echo.id).child.kill("SIGKILL");
+    // Learned once: the next sign-in goes straight to the browser that works.
+    await driver.startPlain(echo, "https://login.example.com/");
+    lines = fs.readFileSync(log, "utf8").trim().split("\n");
+    assert.equal(lines.length, 3);
+    assert.ok(lines[2].includes("--no-sandbox"));
+  } finally {
+    await driver.shutdown();
+  }
+});
+
+test("a failed sign-in browser puts the agent's browser back on the screen", async () => {
+  const home = tmp("plain-fail");
+  const browser = new BrowserManager({ home });
+  const driver = fakeDriver({ startPlain: async () => { throw new LiveError("The plain browser closed as soon as it opened."); } });
+  const live = new LiveManager({ home, browser, desktop: null, drivers: { host: driver, box: driver } });
+  const echo = { ...bot, id: "bot-plain-fail" };
+  await browser.ensure(echo);
+  await assert.rejects(live.takeOver(echo, { url: "https://login.example.com/" }), /closed as soon as it opened/);
+  assert.equal(browser.isHeld(echo.id), false);
+  assert.ok(browser.sessions.get(echo.id)?.alive());
+});

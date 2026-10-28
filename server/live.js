@@ -80,6 +80,8 @@ export function plainChromiumArgs({ profile, url, sandbox = true, inBox = false,
     "--no-first-run",
     "--no-default-browser-check",
     "--password-store=basic",
+    // The agent's browser was just closed, so Chromium would offer to restore pages over the sign-in page.
+    "--hide-crash-restore-bubble",
     "--window-position=0,0",
     `--window-size=${VIEWPORT.width},${VIEWPORT.height}`,
     "--start-maximized",
@@ -126,7 +128,7 @@ export class LiveManager {
     this.idleMs = idleMs;
     this.handbackMs = handbackMs;
     this.drivers = drivers || {
-      host: new HostDriver({ home, desktop }),
+      host: new HostDriver({ home, desktop, browser }),
       box: new BoxDriver({ home, box }),
     };
     this.box = box;
@@ -301,6 +303,8 @@ export class LiveManager {
         await driver.startPlain(bot, target || "about:blank");
       } catch (error) {
         this.browser.release(bot.id);
+        // Put the agent's browser back, so the screen the user is watching is not left empty.
+        await this.browser.ensure(bot).catch(() => {});
         throw error instanceof LiveError ? error : new LiveError(`Could not open a plain browser. ${String(error.message || error).split("\n")[0]}`, 500);
       }
       const state = this.#state(bot);
@@ -375,11 +379,16 @@ export class LiveManager {
 // ---- On the server itself (Linux with Xvfb) ----------------------------------
 
 export class HostDriver {
-  constructor({ home, desktop, which = whichOnPath }) {
+  constructor({ home, desktop, browser = null, which = whichOnPath, chromium = findChromium }) {
     this.kind = "host";
     this.home = home;
     this.desktop = desktop;
+    this.browser = browser;
     this.which = which;
+    this.chromium = chromium;
+    // Chromium's own sandbox needs user namespaces, which Ubuntu 23.10+ blocks for
+    // unprivileged programs (AppArmor). Learned from the first launch: null until then.
+    this.sandbox = process.env.RAVNIR_CHROMIUM_NO_SANDBOX === "1" ? false : null;
     this.vnc = new Map();
     this.plain = new Map();
   }
@@ -444,19 +453,37 @@ export class HostDriver {
     const session = await this.#display(bot);
     const profile = browserProfilePath(this.home, bot);
     await waitForProfileFree(profile, 15_000);
-    const executable = findChromium();
+    const executable = this.chromium();
     if (!executable) throw new LiveError("Chromium is not installed on this server.");
-    const args = plainChromiumArgs({ profile, url, sandbox: process.env.RAVNIR_CHROMIUM_NO_SANDBOX !== "1", extra: this.browser?.network?.plainArgs(bot) || [] });
+    const extra = this.browser?.network?.plainArgs(bot) || [];
+    if (this.sandbox !== false && await this.#launchPlain(bot, executable, session, plainChromiumArgs({ profile, url, extra }))) {
+      this.sandbox = true;
+      return;
+    }
+    if (this.sandbox === true) throw new LiveError("The plain browser closed as soon as it opened.");
+    // No usable sandbox here (the agent's own browser runs without one too): open it the same way.
+    this.sandbox = false;
+    await waitForProfileFree(profile, 5_000);
+    if (!await this.#launchPlain(bot, executable, session, plainChromiumArgs({ profile, url, sandbox: false, extra }))) {
+      throw new LiveError("The plain browser closed as soon as it opened.");
+    }
+  }
+
+  // True when the browser is still running after a moment; a Chromium that dies at
+  // once (no sandbox, no display, a bad flag) is reported, not left as a blank screen.
+  async #launchPlain(bot, executable, session, args) {
     const child = spawn(executable, args, { env: session.env, detached: true, stdio: "ignore" });
     child.unref();
-    const exited = new Promise((resolve) => child.once("exit", () => resolve("exit")));
+    const exited = new Promise((resolve) => {
+      child.once("exit", () => resolve("exit"));
+      child.once("error", () => resolve("exit"));
+    });
     this.plain.set(bot.id, { child, exited });
     child.on("exit", () => {
       if (this.plain.get(bot.id)?.child === child) this.plain.delete(bot.id);
     });
-    // A Chromium that dies at once (no display, a bad flag) is reported, not left as a blank screen.
     const early = await Promise.race([exited, sleep(1500).then(() => "")]);
-    if (early) throw new LiveError("The plain browser closed as soon as it opened.");
+    return !early;
   }
 
   // Closes the plain browser and returns the page it ended on.
