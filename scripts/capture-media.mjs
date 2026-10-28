@@ -110,7 +110,8 @@ async function startModel() {
       return forward();
     }
     if (/^call tool /i.test(user)) return forward();
-    const remember = /^remember that (.+)$/is.exec(user.trim());
+    // The server adds notes for the model in parentheses after the user's words (the reply language); they are not part of the fact.
+    const remember = /^remember that (.+?)(?:\s*\n\s*\(|$)/is.exec(user.trim());
     const tool = (body.tools || []).find((item) => item.function?.name === "remember" && item.function.parameters?.properties?.fact);
     if (remember && tool) {
       writeStream(res, messages, [
@@ -283,9 +284,13 @@ async function shots(browser, base, agents) {
   await settle(page, 600);
   const lines = page.locator(".cost-line");
   const count = await lines.count();
-  const target = lines.nth(Math.max(0, count - 2));
+  // The last reply, so the opened breakdown sits at the bottom of the thread: scrolled up, the
+  // thread shows its Latest button over the text.
+  const target = lines.nth(count - 1);
   await target.scrollIntoViewIfNeeded();
   await target.click();
+  await page.waitForTimeout(500);
+  await page.locator(".proof-panel").last().scrollIntoViewIfNeeded();
   await page.waitForTimeout(500);
   await save(page, "thread-cost.png");
 

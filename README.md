@@ -6,6 +6,13 @@ Persistent agents on your own server, with one shared memory you can read, revie
 
 Give each agent a job, a model and its own browser. It keeps working when you close the tab, runs routines on your server, and brings what it learns back to a shared vault of Markdown notes in git. Use it from your computer or your phone.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/media/home-dark.png" />
+  <img src="docs/media/home.png" alt="Ravnir's Home: four agents, what they spent today, and the routine coming up next" width="100%" />
+</picture>
+
+**[Watch the two minute walkthrough](https://ravnir.dev/assets/walkthrough.mp4)**: first-run setup, an agent using its own browser, shared memory you can review and revert, approvals for commands, routines, and the cost of every reply. Recorded in one real session on a free model; the waits while agents work are sped up.
+
 **Public beta (0.1.0).** Expect rough edges and breaking changes before 1.0. See the [roadmap](docs/roadmap.md).
 
 Ravnir is original software under the [MIT license](LICENSE). There is no official token or coin. Ravnir adds no telemetry; the model providers and services you connect have their own data policies.
@@ -13,7 +20,15 @@ Ravnir is original software under the [MIT license](LICENSE). There is no offici
 ## Three things to try
 
 1. **Teach one agent, ask another.** Tell an agent a preference and ask it to remember it. Its commit appears in Memory, and the shared profile note is included in other agents' next turns. Open the diff, follow the link back to the turn, or revert the change. Changes to shared rules and project notes go through proposals for your approval.
+
+   <img src="docs/media/memory-demo.gif" alt="An agent remembers a preference; Memory shows the commit, its diff and a Revert button" width="100%" />
+
 2. **See what a reply cost.** Each completed turn's final reply shows recorded tokens and cost, with a breakdown. Usage shows the ledger totals; routines show their spend. Set daily or monthly caps and receive a warning at 80 percent. When a provider does not report a price, Ravnir shows that limitation rather than inventing a dollar amount or subscription quota percentage.
+
+   <img src="docs/media/thread-cost.png" alt="A reply's Proof line opened: tokens in and out, the model, and the notes it read" width="100%" />
+
+   The screenshots use demo agents and a scripted model at a made-up price.
+
 3. **Leave a routine running.** Schedule a recurring task or a one-time reminder, then close the app. Failed routines appear in Home's Needs you section. Routines with nothing new can stay quiet while retaining a ledger entry. Stuck turns trigger an alert.
 
 These behaviors have automated tests. The [model report card](docs/model-report-card.md) measures what actual models completed, how often they asked for help, and what the runs cost.
