@@ -6,7 +6,7 @@ Persistent agents on your own server, with one shared memory you can read, revie
 
 Give each agent a job, a model and its own browser. It keeps working when you close the tab, runs routines on your server, and brings what it learns back to a shared vault of Markdown notes in git. Use it from your computer or your phone.
 
-**Public beta (0.1.0).** Expect rough edges and breaking changes before 1.0. In a 24-hour routine test (five agents, a run every 15 minutes) every run that started succeeded, but the test machine slept for part of the night, so a full rerun is still pending. See the [roadmap](docs/roadmap.md).
+**Public beta (0.1.0).** Expect rough edges and breaking changes before 1.0. See the [roadmap](docs/roadmap.md).
 
 Ravnir is original software under the [MIT license](LICENSE). There is no official token or coin. Ravnir adds no telemetry; the model providers and services you connect have their own data policies.
 
