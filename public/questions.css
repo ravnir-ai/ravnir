@@ -44,3 +44,4 @@
 .ask-open:hover { text-decoration: underline; }
 
 .usage-col.num.asks { width: 44px; }
+.ask-stack > .sugg-stack { min-width: 0; }

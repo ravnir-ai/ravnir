@@ -1847,7 +1847,8 @@ function renderMessage(message) {
       const live = (state.suggestions || []).find((item) => item.id === suggestion.id);
       cards.append(RavnirSuggestions.card(live || { ...suggestion, status: suggestion.status || "accepted" }));
     }
-    const holder = row.querySelector(".art-row");
+    // One grid cell holds the extras: a second stack in it would draw on top of the first.
+    const holder = row.querySelector(".art-row") || row.querySelector(":scope > .ask-stack");
     if (holder) holder.append(cards);
     else row.insertBefore(cards, row.querySelector(".chat-meta"));
   }
