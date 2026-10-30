@@ -1010,6 +1010,7 @@ pre.terminal { flex: 1; min-height: 240px; margin: 0; background: #1d1d1f; borde
 /* v6: rail views, inbox, notifications, schedule picker, permissions, import. */
 .rail-nav { display: flex; flex-direction: column; gap: 2px; margin: 0 10px 10px; }
 .rail-nav .today-nav { margin: 0; }
+.rail-nav-sep { height: 1px; margin: 5px 10px; background: var(--line-soft); }
 .rail-nav-foot { margin: 0 -4px 10px; }
 .rail-links button.active { color: var(--text); }
 label input[type="checkbox"], input[type="checkbox"] { width: auto; margin: 0; padding: 0; accent-color: var(--text); flex: none; }
